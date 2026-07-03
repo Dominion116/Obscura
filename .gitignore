@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# misc
+.DS_Store
+*.tsbuildinfo
+coverage/
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# internal planning docs (kept out of the public repo)
+CLAUDE.md
+implementation.md
+Obscura_PRD.docx
