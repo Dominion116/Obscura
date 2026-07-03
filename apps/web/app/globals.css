@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* ── Obscura theme tokens ─────────────────────────────────────────────
+   Derived from the landing hero per the PRD: near-black background,
+   electric cobalt accent, white / light-neutral text, glass surfaces. */
+@theme {
+  --color-background: #04050a;
+  --color-surface: #0a0c14;
+  --color-surface-raised: #10131f;
+
+  --color-cobalt-200: #aabfff;
+  --color-cobalt-300: #7d9bff;
+  --color-cobalt-400: #5478ff;
+  --color-cobalt-500: #2b5cff;
+  --color-cobalt-600: #1f47e6;
+  --color-cobalt-700: #1836b8;
+
+  --color-foreground: #f4f6fb;
+  --color-muted: #a3aabd;
+  --color-line: rgb(244 246 251 / 0.08);
+
+  --color-valid: #34d399;
+  --color-revoked: #f87171;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --radius-btn: 0.375rem; /* small radius on primary buttons */
+  --radius-card: 1rem; /* larger radius on cards */
+
+  --animate-slow-drift: slow-drift 24s ease-in-out infinite alternate;
+  --animate-slow-drift-2: slow-drift-2 30s ease-in-out infinite alternate;
+
+  @keyframes slow-drift {
+    from {
+      transform: translate3d(-6%, -4%, 0) scale(1);
+    }
+    to {
+      transform: translate3d(6%, 5%, 0) scale(1.15);
+    }
+  }
+  @keyframes slow-drift-2 {
+    from {
+      transform: translate3d(5%, 6%, 0) scale(1.1);
+    }
+    to {
+      transform: translate3d(-5%, -6%, 0) scale(0.95);
+    }
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism surface: translucent panel, soft blur, faint border. */
+@utility glass {
+  background: rgb(255 255 255 / 0.04);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+
+@utility glass-strong {
+  background: rgb(16 19 31 / 0.72);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgb(255 255 255 / 0.1);
+}
+
+/* Thin scrollbars that match the dark surface. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.15) transparent;
+}
