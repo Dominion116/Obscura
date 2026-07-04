@@ -29,14 +29,35 @@ export const StatsBento = () => {
   const fmt = (n: number | undefined) =>
     isLoading || n === undefined ? '—' : String(n)
 
+  // One 100vh section holding the problem statement and the stats grid
+  // together, vertically centered. Mobile keeps min-h-screen since the
+  // stacked content can exceed one screen.
   return (
     <section
       ref={sectionRef}
-      className="min-h-screen bg-background flex flex-col justify-center">
+      className="min-h-screen md:h-screen bg-background flex flex-col justify-center gap-12 py-16 md:gap-16">
+      <TimelineAnimation
+        animationNum={0}
+        timelineRef={sectionRef}
+        className="mx-auto w-full max-w-7xl px-6">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          The problem
+        </p>
+        <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          Every team that deploys its own test wrappers fragments the
+          ecosystem.
+        </h2>
+        <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+          Zama&apos;s Confidential Token Wrappers Registry already maps each
+          ERC-20 to its official ERC-7984 wrapper — one canonical, revocable
+          source of truth. Obscura makes it the obvious place to point to:
+          browsable, trustworthy, and usable by anyone.
+        </p>
+      </TimelineAnimation>
       <div className="grid grid-cols-1 md:grid-cols-6 md:grid-rows-2 gap-4 max-w-7xl mx-auto px-6">
         {/* Primary Stat */}
         <TimelineAnimation
-          animationNum={0}
+          animationNum={1}
           timelineRef={sectionRef}
           className="md:col-span-3 md:row-span-2 bg-card border border-border rounded-3xl p-10 flex flex-col justify-between overflow-hidden relative">
           <div className="absolute bottom-0 left-0 right-0 top-0 bg-[repeating-linear-gradient(45deg,var(--border)_0px_1px,transparent_1px_10px)] mask-[radial-gradient(ellipse_80%_50%_at_100%_0%,#000_70%,transparent_110%)] pointer-events-none"></div>
@@ -55,7 +76,7 @@ export const StatsBento = () => {
 
         {/* Secondary Stat A */}
         <TimelineAnimation
-          animationNum={1}
+          animationNum={2}
           timelineRef={sectionRef}
           className="md:col-span-3 bg-card rounded-3xl p-8 border border-border flex items-center justify-between">
           <div>
@@ -77,7 +98,7 @@ export const StatsBento = () => {
 
         {/* Tertiary Stat B */}
         <TimelineAnimation
-          animationNum={2}
+          animationNum={3}
           timelineRef={sectionRef}
           className="md:col-span-1 bg-card rounded-3xl p-6 border border-border flex flex-col justify-center text-center">
           <p className="text-2xl text-foreground">{fmt(valid)}</p>
@@ -88,7 +109,7 @@ export const StatsBento = () => {
 
         {/* Tertiary Stat C */}
         <TimelineAnimation
-          animationNum={3}
+          animationNum={4}
           timelineRef={sectionRef}
           className="md:col-span-2 bg-secondary rounded-3xl p-6 flex items-center gap-4">
           <div className="size-10 rounded-full bg-background flex items-center justify-center shrink-0 shadow-sm">
