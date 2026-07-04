@@ -68,14 +68,14 @@ No private data ever touches a server. The indexer stores only public, on-chain-
 | Layer | Choice |
 | --- | --- |
 | Frontend | Next.js 15, React 19, App Router |
-| Styling | Tailwind CSS v4, glass-on-dark cobalt theme |
+| Styling | Tailwind CSS v4, shadcn/ui theme (dark mode) |
 | Motion | motion (Framer Motion v12), blur-in reveals |
 | Chain reads and writes | wagmi + viem, fully typed contract hooks |
 | Wallet | Reown AppKit |
 | Confidential operations | Zama Relayer SDK (input proofs, user + public decryption) |
 | Backend | Node + Express event indexer and REST API |
 | Database | MongoDB Atlas + Mongoose |
-| Monorepo | Turborepo + pnpm workspaces |
+| Monorepo | Turborepo + npm workspaces |
 
 ## Monorepo layout
 
@@ -97,18 +97,18 @@ obscura/
 
 ## Getting started
 
-**Prerequisites:** Node.js ≥ 20, pnpm ≥ 10.
+**Prerequisites:** Node.js ≥ 20, npm ≥ 10.
 
 ```bash
 # install dependencies
-pnpm install
+npm install
 
 # configure the web app
 cp .env.example apps/web/.env.local
 # then set NEXT_PUBLIC_REOWN_PROJECT_ID — create a free project at https://cloud.reown.com
 
 # run everything
-pnpm dev
+npm run dev
 ```
 
 The web app runs at `http://localhost:3000`.
@@ -127,10 +127,10 @@ The web app runs at `http://localhost:3000`.
 
 | Command | Effect |
 | --- | --- |
-| `pnpm dev` | Run all workspace dev servers through Turborepo |
-| `pnpm build` | Production build of every workspace |
-| `pnpm typecheck` | TypeScript checks across the monorepo |
-| `pnpm lint` | Lint every workspace |
+| `npm run dev` | Run all workspace dev servers through Turborepo |
+| `npm run build` | Production build of every workspace |
+| `npm run typecheck` | TypeScript checks across the monorepo |
+| `npm run lint` | Lint every workspace |
 
 ## Key addresses (Sepolia)
 

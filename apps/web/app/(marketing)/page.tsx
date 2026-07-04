@@ -1,4 +1,4 @@
-import { Hero } from "@/components/landing/hero";
+import { HeroSection } from "@/components/blocks/hero-section-5";
 import { Problem } from "@/components/landing/problem";
 import { StatsBand } from "@/components/landing/stats-band";
 import { HowItWorks } from "@/components/landing/how-it-works";
@@ -8,7 +8,7 @@ import { TrustSecurity } from "@/components/landing/trust-security";
 export default function LandingPage() {
   return (
     <>
-      <Hero />
+      <HeroSection />
       <Problem />
       <StatsBand />
       <HowItWorks />
