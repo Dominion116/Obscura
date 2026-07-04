@@ -11,6 +11,7 @@ import { useState } from "react";
 import { CheckCircle2, Loader2, PlayCircle, XCircle } from "lucide-react";
 import { getFhevmInstance } from "@/lib/fhevm";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type StepState = "idle" | "running" | "ok" | "error";
 
@@ -29,13 +30,13 @@ const initialSteps: Step[] = [
 function StepIcon({ state }: { state: StepState }) {
   switch (state) {
     case "running":
-      return <Loader2 className="size-4 animate-spin text-cobalt-300" />;
+      return <Loader2 className="size-4 animate-spin text-primary" />;
     case "ok":
-      return <CheckCircle2 className="size-4 text-valid" />;
+      return <CheckCircle2 className="size-4 text-chart-2" />;
     case "error":
-      return <XCircle className="size-4 text-revoked" />;
+      return <XCircle className="size-4 text-destructive" />;
     default:
-      return <span className="block size-4 rounded-full border border-line" />;
+      return <span className="block size-4 rounded-full border border-border" />;
   }
 }
 
@@ -75,11 +76,11 @@ export default function SpikePage() {
   }
 
   return (
-    <div className="glass mx-auto mt-16 max-w-xl rounded-(--radius-card) p-8">
+    <div className="mx-auto mt-16 max-w-xl rounded-xl border border-border bg-card p-8">
       <h1 className="text-2xl font-semibold tracking-tight">
         Relayer SDK spike
       </h1>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-sm text-muted-foreground">
         Phase 0 de-risking: proves the FHEVM client loads and can prepare a
         user decryption before any feature work depends on it.
       </p>
@@ -96,7 +97,9 @@ export default function SpikePage() {
                 <span
                   className={cn(
                     "mt-1 block font-mono text-xs",
-                    step.state === "error" ? "text-revoked" : "text-muted",
+                    step.state === "error"
+                      ? "text-destructive"
+                      : "text-muted-foreground",
                   )}
                 >
                   {step.detail}
@@ -107,19 +110,14 @@ export default function SpikePage() {
         ))}
       </ul>
 
-      <button
-        type="button"
-        onClick={run}
-        disabled={running}
-        className="mt-8 inline-flex items-center gap-2 rounded-(--radius-btn) bg-cobalt-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-cobalt-600 disabled:opacity-50"
-      >
+      <Button onClick={run} disabled={running} className="mt-8">
         {running ? (
-          <Loader2 className="size-4 animate-spin" aria-hidden />
+          <Loader2 className="mr-2 size-4 animate-spin" aria-hidden />
         ) : (
-          <PlayCircle className="size-4" aria-hidden />
+          <PlayCircle className="mr-2 size-4" aria-hidden />
         )}
         {running ? "Running…" : "Run spike"}
-      </button>
+      </Button>
     </div>
   );
 }

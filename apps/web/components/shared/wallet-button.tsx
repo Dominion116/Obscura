@@ -4,15 +4,16 @@ import { useAccount } from "wagmi";
 import { Wallet } from "lucide-react";
 import { env } from "@/config/env";
 import { openWalletModal } from "@/lib/appkit";
-import { cn, shortAddress } from "@/lib/utils";
+import { shortAddress } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export function WalletButton() {
   const { address, isConnected } = useAccount();
   const disabled = !env.reownProjectId;
 
   return (
-    <button
-      type="button"
+    <Button
+      variant={isConnected ? "outline" : "default"}
       onClick={openWalletModal}
       disabled={disabled}
       title={
@@ -20,16 +21,9 @@ export function WalletButton() {
           ? "Set NEXT_PUBLIC_REOWN_PROJECT_ID to enable wallet connection"
           : undefined
       }
-      className={cn(
-        "inline-flex items-center gap-2 rounded-(--radius-btn) px-4 py-2 text-sm font-medium transition-colors",
-        isConnected
-          ? "glass glass-hover-cobalt text-foreground"
-          : "bg-cobalt-500 text-white hover:bg-cobalt-600",
-        disabled && "cursor-not-allowed opacity-50",
-      )}
     >
-      <Wallet className="size-4" aria-hidden />
+      <Wallet className="mr-2 size-4" aria-hidden />
       {isConnected && address ? shortAddress(address) : "Connect wallet"}
-    </button>
+    </Button>
   );
 }

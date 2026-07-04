@@ -10,10 +10,10 @@ export function NetworkBadge() {
 
   return (
     <span
+      role="status"
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
-        "glass",
-        wrongNetwork ? "text-revoked" : "text-muted",
+        "inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium",
+        wrongNetwork ? "text-destructive" : "text-muted-foreground",
       )}
       title={
         wrongNetwork
@@ -22,9 +22,10 @@ export function NetworkBadge() {
       }
     >
       <span
+        aria-hidden
         className={cn(
           "size-1.5 rounded-full",
-          wrongNetwork ? "bg-revoked" : "bg-valid",
+          wrongNetwork ? "bg-destructive" : "bg-chart-2",
         )}
       />
       {wrongNetwork ? "Wrong network" : "Sepolia"}
