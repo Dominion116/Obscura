@@ -7,6 +7,7 @@ import {
   SEPOLIA_CHAIN_ID,
 } from '@obscura/shared'
 import { TimelineAnimation } from '@/components/ui/timeline-animation'
+import { Badge } from '@/components/ui/badge'
 import { ShieldCheck } from 'lucide-react'
 
 export const StatsBento = () => {
@@ -29,21 +30,20 @@ export const StatsBento = () => {
   const fmt = (n: number | undefined) =>
     isLoading || n === undefined ? '—' : String(n)
 
-  // One 100vh section holding the problem statement and the stats grid
-  // together, vertically centered. Mobile keeps min-h-screen since the
-  // stacked content can exceed one screen.
+  // One viewport-height section holding the problem statement and the stats
+  // grid, vertically centered. min-h (not a hard h) renders exactly 100vh
+  // when the content fits and grows instead of clipping on short screens
+  // like tablet landscape or stacked mobile.
   return (
     <section
       ref={sectionRef}
-      className="min-h-screen md:h-screen bg-background flex flex-col justify-center gap-12 py-16 md:gap-16">
+      className="min-h-screen bg-background flex flex-col justify-center gap-12 py-16 md:gap-16">
       <TimelineAnimation
         animationNum={0}
         timelineRef={sectionRef}
         className="mx-auto w-full max-w-7xl px-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          The problem
-        </p>
-        <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <Badge variant="secondary">The problem</Badge>
+        <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-pretty md:text-4xl lg:text-5xl">
           Every team that deploys its own test wrappers fragments the
           ecosystem.
         </h2>
@@ -59,7 +59,7 @@ export const StatsBento = () => {
         <TimelineAnimation
           animationNum={1}
           timelineRef={sectionRef}
-          className="md:col-span-3 md:row-span-2 bg-card border border-border rounded-3xl p-10 flex flex-col justify-between overflow-hidden relative">
+          className="md:col-span-3 md:row-span-2 bg-card border border-border rounded-3xl p-8 md:p-10 flex flex-col justify-between overflow-hidden relative">
           <div className="absolute bottom-0 left-0 right-0 top-0 bg-[repeating-linear-gradient(45deg,var(--border)_0px_1px,transparent_1px_10px)] mask-[radial-gradient(ellipse_80%_50%_at_100%_0%,#000_70%,transparent_110%)] pointer-events-none"></div>
           <div>
             {/* accent chip: this theme's dark-mode `secondary` is near-white,
@@ -67,7 +67,7 @@ export const StatsBento = () => {
             <span className="inline-block px-3 py-1 bg-accent rounded-full text-[10px] font-semibold text-accent-foreground uppercase tracking-widest mb-6">
               Encrypted balances
             </span>
-            <h3 className="text-6xl tracking-tighter text-foreground">100%</h3>
+            <h3 className="text-5xl md:text-6xl tracking-tighter text-foreground">100%</h3>
           </div>
           <p className="text-muted-foreground text-sm max-w-xs">
             Every wrapped balance lives on-chain as ERC-7984 ciphertext.

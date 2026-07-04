@@ -10,14 +10,16 @@ export function HeroSection() {
     return (
         <>
             <HeroHeader />
-            <main className="overflow-x-hidden">
+            {/* a div, not <main>: the marketing layout owns the single main
+                landmark so the sections after the hero are inside it too */}
+            <div className="overflow-x-hidden">
                 {/* relative so the inset-1 backdrop frame wraps the hero content
                     instead of the viewport — keeps the buttons inside the frame */}
                 <section className="relative min-h-screen">
                     <div className="py-24 md:pb-32 lg:pb-36 lg:pt-72">
                         <div className="relative z-10 mx-auto flex max-w-7xl flex-col px-6 lg:block lg:px-12">
                             <div className="mx-auto max-w-lg text-center lg:ml-0 lg:max-w-full lg:text-left">
-                                <h1 className="mt-8 max-w-2xl text-balance text-5xl md:text-6xl lg:mt-16 xl:text-7xl">Move value privately on Ethereum</h1>
+                                <h1 className="mt-8 max-w-2xl text-balance text-5xl font-semibold tracking-tight md:text-6xl lg:mt-16 xl:text-7xl">Move value privately on Ethereum</h1>
                                 <p className="mt-8 max-w-2xl text-balance text-lg">Every confidential token wrapper on Sepolia in one place. Browse the registry, wrap ERC-20s into encrypted ERC-7984 tokens, and decrypt balances only you can see.</p>
 
                                 <div className="mt-12 flex flex-col items-center justify-center gap-2 sm:flex-row lg:justify-start">
@@ -67,7 +69,7 @@ export function HeroSection() {
                         </div>
                     </div>
                 </section>
-            </main>
+            </div>
         </>
     )
 }
@@ -95,6 +97,7 @@ const HeroHeader = () => {
     return (
         <header>
             <nav
+                aria-label="Main"
                 data-state={menuState && 'active'}
                 className="group fixed z-20 w-full pt-2">
                 <div className={cn('mx-auto max-w-7xl rounded-3xl px-6 transition-all duration-300 lg:px-12', scrolled && 'bg-background/50 backdrop-blur-2xl')}>
@@ -137,8 +140,12 @@ const HeroHeader = () => {
                                 <ul className="space-y-6 text-base">
                                     {menuItems.map((item, index) => (
                                         <li key={index}>
+                                            {/* close the mobile menu on navigation —
+                                                client-side routing otherwise leaves
+                                                the panel open over the new page */}
                                             <Link
                                                 href={item.href}
+                                                onClick={() => setMenuState(false)}
                                                 className="text-muted-foreground hover:text-accent-foreground block duration-150">
                                                 <span>{item.name}</span>
                                             </Link>

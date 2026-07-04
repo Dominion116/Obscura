@@ -7,7 +7,10 @@ export default function DevelopersLayout({
   return (
     <>
       <Nav />
-      <main className="mx-auto min-h-[70dvh] w-full max-w-7xl px-6 py-10">
+      <main
+        id="main-content"
+        className="mx-auto min-h-[70dvh] w-full max-w-7xl px-6 py-10"
+      >
         {children}
       </main>
       <Footer />
