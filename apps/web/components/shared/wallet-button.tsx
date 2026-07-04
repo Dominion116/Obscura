@@ -23,7 +23,7 @@ export function WalletButton() {
       className={cn(
         "inline-flex items-center gap-2 rounded-(--radius-btn) px-4 py-2 text-sm font-medium transition-colors",
         isConnected
-          ? "glass text-foreground hover:border-cobalt-500/50"
+          ? "glass glass-hover-cobalt text-foreground"
           : "bg-cobalt-500 text-white hover:bg-cobalt-600",
         disabled && "cursor-not-allowed opacity-50",
       )}

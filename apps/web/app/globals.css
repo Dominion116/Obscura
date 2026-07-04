@@ -67,11 +67,23 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-cobalt-200: #aabfff;
+  --color-cobalt-300: #7d9bff;
+  --color-cobalt-400: #5478ff;
+  --color-cobalt-500: #2b5cff;
+  --color-cobalt-600: #1f47e6;
+  --color-cobalt-700: #1836b8;
+  --color-line: rgb(244 246 251 / 0.08);
+  --color-muted: #a3aabd;
+  --color-valid: #34d399;
+  --color-revoked: #f87171;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-btn: 0.375rem;
+  --radius-card: 1rem;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
@@ -83,5 +95,27 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@utility glass {
+  background: rgb(255 255 255 / 0.04);
+  backdrop-filter: blur(16px);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(255 255 255 / 0.08);
+}
+
+@utility glass-strong {
+  background: rgb(16 19 31 / 0.72);
+  backdrop-filter: blur(24px);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(255 255 255 / 0.1);
+}
+
+@utility glass-hover-cobalt {
+  &:hover {
+    border-color: rgb(43 92 255 / 0.5);
   }
 }
