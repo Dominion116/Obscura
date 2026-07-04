@@ -2,8 +2,6 @@
 import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { InfiniteSlider } from '@/components/ui/infinite-slider'
-import { ProgressiveBlur } from '@/components/ui/progressive-blur'
 import { cn } from '@/lib/utils'
 import { Menu, X, ChevronRight, EyeOff } from 'lucide-react'
 import { useScroll, motion } from 'motion/react'
@@ -66,112 +64,6 @@ export function HeroSection() {
                                 crossOrigin="anonymous"
                                 className="size-full object-cover opacity-50 invert dark:opacity-35 dark:invert-0 dark:lg:opacity-75"
                                 src="https://ik.imagekit.io/lrigu76hy/tailark/dna-video.mp4?updatedAt=1745736251477"></video>
-                        </div>
-                    </div>
-                </section>
-                <section className="bg-background pb-2">
-                    <div className="group relative m-auto max-w-7xl px-6">
-                        <div className="flex flex-col items-center md:flex-row">
-                            <div className="md:max-w-44 md:border-r md:pr-6">
-                                <p className="text-end text-sm">Built on the confidential stack</p>
-                            </div>
-                            <div className="relative py-6 md:w-[calc(100%-11rem)]">
-                                {/* local SVGs: the template's tailus.io logo URLs are
-                                    dead (301 to an unrelated site), and same-origin
-                                    assets sidestep the app's COEP headers */}
-                                <InfiniteSlider
-                                    speedOnHover={20}
-                                    speed={40}
-                                    gap={112}>
-                                    <div className="flex">
-                                        <img
-                                            className="mx-auto h-5 w-fit dark:invert"
-                                            src="/logos/zama.svg"
-                                            alt="Zama Logo"
-                                            height="20"
-                                            width="auto"
-                                        />
-                                    </div>
-
-                                    <div className="flex">
-                                        <img
-                                            className="mx-auto h-5 w-fit dark:invert"
-                                            src="/logos/erc-7984.svg"
-                                            alt="ERC-7984 Logo"
-                                            height="20"
-                                            width="auto"
-                                        />
-                                    </div>
-                                    <div className="flex">
-                                        <img
-                                            className="mx-auto h-5 w-fit dark:invert"
-                                            src="/logos/ethereum-sepolia.svg"
-                                            alt="Ethereum Sepolia Logo"
-                                            height="20"
-                                            width="auto"
-                                        />
-                                    </div>
-                                    <div className="flex">
-                                        <img
-                                            className="mx-auto h-5 w-fit dark:invert"
-                                            src="/logos/openzeppelin.svg"
-                                            alt="OpenZeppelin Logo"
-                                            height="20"
-                                            width="auto"
-                                        />
-                                    </div>
-                                    <div className="flex">
-                                        <img
-                                            className="mx-auto h-5 w-fit dark:invert"
-                                            src="/logos/relayer-sdk.svg"
-                                            alt="Zama Relayer SDK Logo"
-                                            height="20"
-                                            width="auto"
-                                        />
-                                    </div>
-                                    <div className="flex">
-                                        <img
-                                            className="mx-auto h-5 w-fit dark:invert"
-                                            src="/logos/wagmi.svg"
-                                            alt="wagmi Logo"
-                                            height="20"
-                                            width="auto"
-                                        />
-                                    </div>
-                                    <div className="flex">
-                                        <img
-                                            className="mx-auto h-5 w-fit dark:invert"
-                                            src="/logos/nextjs.svg"
-                                            alt="Next.js Logo"
-                                            height="20"
-                                            width="auto"
-                                        />
-                                    </div>
-
-                                    <div className="flex">
-                                        <img
-                                            className="mx-auto h-5 w-fit dark:invert"
-                                            src="/logos/viem.svg"
-                                            alt="viem Logo"
-                                            height="20"
-                                            width="auto"
-                                        />
-                                    </div>
-                                </InfiniteSlider>
-
-                                <div className="bg-linear-to-r from-background absolute inset-y-0 left-0 w-20"></div>
-                                <div className="bg-linear-to-l from-background absolute inset-y-0 right-0 w-20"></div>
-                                <ProgressiveBlur
-                                    className="pointer-events-none absolute left-0 top-0 h-full w-20"
-                                    direction="left"
-                                    blurIntensity={1}
-                                />
-                                <ProgressiveBlur
-                                    className="pointer-events-none absolute right-0 top-0 h-full w-20"
-                                    direction="right"
-                                    blurIntensity={1}
-                                />
-                            </div>
                         </div>
                     </div>
                 </section>
