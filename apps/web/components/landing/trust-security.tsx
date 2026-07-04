@@ -1,4 +1,5 @@
 import { Eye, Globe, ShieldAlert } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { BlurReveal } from "@/components/shared/blur-reveal";
 
 const items = [
@@ -21,24 +22,22 @@ const items = [
 
 export function TrustSecurity() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
+    <section className="mx-auto max-w-7xl px-6 py-24 md:py-32">
       <BlurReveal>
-        <p className="text-sm font-medium uppercase tracking-widest text-cobalt-400">
-          Trust and security
-        </p>
-        <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
+        <Badge variant="secondary">Trust and security</Badge>
+        <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight text-pretty md:text-4xl lg:text-5xl">
           Two decryption paths, kept deliberately distinct.
         </h2>
       </BlurReveal>
       <div className="mt-12 grid gap-4 md:grid-cols-3">
         {items.map((item, i) => (
           <BlurReveal key={item.title} delay={i * 0.1}>
-            <div className="glass h-full rounded-(--radius-card) p-6">
-              <div className="flex size-10 items-center justify-center rounded-full bg-cobalt-500/15 text-cobalt-300">
+            <div className="h-full rounded-xl border border-border bg-card p-6">
+              <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
                 <item.icon className="size-5" aria-hidden />
-              </div>
-              <h3 className="mt-4 font-medium">{item.title}</h3>
-              <p className="mt-2 text-sm font-light text-muted">{item.body}</p>
+              </span>
+              <h3 className="mt-4 font-medium tracking-tight">{item.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{item.body}</p>
             </div>
           </BlurReveal>
         ))}

@@ -81,17 +81,16 @@ const Feature17 = (props: Props) => {
 
   return (
     <section className={cn("py-32", className)}>
-      {/* Tailwind v4's `container` neither centers nor pads by itself */}
-      <div className="container mx-auto px-6">
+      <div className="mx-auto max-w-7xl px-6">
         {(label || heading) && (
-          <div className="mx-auto mb-12 flex max-w-3xl flex-col items-center gap-4 text-center">
+          <div className="mb-12 flex max-w-3xl flex-col items-start gap-4 text-left">
             {label && <Badge variant="secondary">{label}</Badge>}
             <h2 className="text-3xl font-semibold tracking-tight text-pretty md:text-4xl lg:text-5xl">
               {heading}
             </h2>
           </div>
         )}
-        <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2">
+        <div className="grid max-w-6xl gap-12 md:grid-cols-2">
           {items.map((feature, idx) => (
             <div
               key={idx}
@@ -112,7 +111,7 @@ const Feature17 = (props: Props) => {
           ))}
         </div>
         {buttons?.primary?.url && (
-          <div className="mt-16 flex justify-center">
+          <div className="mt-16 flex justify-start">
             <Button size="lg" asChild>
               <a href={buttons.primary.url}>{buttons.primary.text}</a>
             </Button>
