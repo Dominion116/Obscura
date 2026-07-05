@@ -3,6 +3,7 @@
 // Registry explorer (PRD §7.2): every registered pair with validity always
 // visible, searchable by symbol or address, filterable by validity, with
 // per-pair rate, decimals, and TVS, and explorer links for verification.
+// Selecting a pair opens the actions drawer (PRD §7.3).
 
 import { useMemo, useState } from "react";
 import { RefreshCw, SearchX, ShieldAlert, Search } from "lucide-react";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { PairDrawer } from "@/components/pair/pair-drawer";
 import { PairTable } from "./pair-table";
 import { PairCards } from "./pair-cards";
 
@@ -35,6 +37,7 @@ export function RegistryExplorer() {
     useRegistryPairs();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ValidityFilter>("all");
+  const [selected, setSelected] = useState<EnrichedPair | null>(null);
 
   const counts = useMemo(() => {
     const valid = pairs?.filter((p) => p.isValid).length ?? 0;
@@ -148,10 +151,10 @@ export function RegistryExplorer() {
             {filtered.length} of {counts.all} pairs shown
           </p>
           <div className="hidden md:block">
-            <PairTable pairs={filtered} />
+            <PairTable pairs={filtered} onSelect={setSelected} />
           </div>
           <div className="md:hidden">
-            <PairCards pairs={filtered} />
+            <PairCards pairs={filtered} onSelect={setSelected} />
           </div>
           <p className="text-xs text-muted-foreground">
             Read live from the registry at every load and refreshed each
@@ -159,6 +162,8 @@ export function RegistryExplorer() {
           </p>
         </>
       )}
+
+      <PairDrawer pair={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

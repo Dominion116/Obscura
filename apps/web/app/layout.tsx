@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
 import { Providers } from "@/providers";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 // Open Sans is the theme's sans font, loaded via next/font. Georgia and
@@ -33,6 +34,7 @@ export default function RootLayout({
           Skip to content
         </a>
         <Providers>{children}</Providers>
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );

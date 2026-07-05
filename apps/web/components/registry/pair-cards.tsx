@@ -1,10 +1,20 @@
+"use client";
+
+import { ChevronRight } from "lucide-react";
 import type { EnrichedPair } from "@obscura/shared";
+import { Button } from "@/components/ui/button";
 import { AddressLink } from "./address-link";
 import { ValidityBadge } from "./validity-badge";
 import { formatRate, formatTokenAmount } from "@/lib/format";
 
 /** Mobile layout: the same pair data as the table, stacked as cards. */
-export function PairCards({ pairs }: { pairs: EnrichedPair[] }) {
+export function PairCards({
+  pairs,
+  onSelect,
+}: {
+  pairs: EnrichedPair[];
+  onSelect: (pair: EnrichedPair) => void;
+}) {
   return (
     <ul className="flex flex-col gap-3">
       {pairs.map((pair) => (
@@ -64,6 +74,15 @@ export function PairCards({ pairs }: { pairs: EnrichedPair[] }) {
               Wrapper <AddressLink address={pair.confidentialTokenAddress} />
             </span>
           </div>
+
+          <Button
+            variant="outline"
+            onClick={() => onSelect(pair)}
+            className="mt-4 w-full"
+          >
+            Open actions
+            <ChevronRight className="ml-1.5 size-4" aria-hidden />
+          </Button>
         </li>
       ))}
     </ul>
