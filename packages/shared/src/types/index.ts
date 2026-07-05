@@ -96,3 +96,27 @@ export interface GlobalStats {
   revokedPairs: number;
   aggregateTvs: string;
 }
+
+/**
+ * A registered pair as served by the read API (apps/api). Same fields as
+ * EnrichedPair, but `rate`/`tvs` are decimal strings — JSON has no bigint —
+ * plus the registration metadata the indexer captures that a live on-chain
+ * read doesn't carry.
+ */
+export interface IndexedPair {
+  tokenAddress: Address;
+  confidentialTokenAddress: Address;
+  isValid: boolean;
+  tokenSymbol: string;
+  tokenName: string;
+  tokenDecimals: number;
+  wrapperSymbol: string;
+  wrapperName: string;
+  wrapperDecimals: number;
+  rate: string;
+  tvs: string;
+  /** Unix ms. */
+  registeredAt: number;
+  /** Unix ms, or null while the pair is still valid. */
+  revokedAt: number | null;
+}
