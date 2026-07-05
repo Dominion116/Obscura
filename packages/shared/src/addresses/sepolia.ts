@@ -1,7 +1,7 @@
 // Official Zama deployments on Ethereum Sepolia (chain 11155111).
 // Source: https://docs.zama.org/protocol/protocol-apps/addresses/testnet/sepolia
 // The registry auto-discovers pairs on chain; the wrapper list below is a
-// convenience snapshot for the faucet and for offline reference — the app
+// convenience snapshot for the faucet and for offline reference. The app
 // must always treat the registry as the source of truth.
 
 export const SEPOLIA_CHAIN_ID = 11155111;

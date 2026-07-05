@@ -2,7 +2,7 @@
 
 // Persistent home for unwrap requests (PRD §7.3): the two-step flow keeps
 // running state in localStorage so a user can close the tab mid-flow and
-// resume from the tracker or the drawer later. Only public data is stored —
+// resume from the tracker or the drawer later. Only public data is stored;
 // the cleartext amount is already public once the unwrap decrypts.
 
 import { useSyncExternalStore } from "react";

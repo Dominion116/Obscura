@@ -1,13 +1,13 @@
 ---
 title: React Hooks
-description: Obscura's typed contract-interaction hooks — registry reads, wrap, the unwrap state machine, decryption — and how to lift them into your own app.
+description: Obscura's typed contract-interaction hooks, registry reads, wrap, the unwrap state machine, decryption, and how to lift them into your own app.
 ---
 
 import { Callout } from "nextra/components";
 
 # React Hooks
 
-Obscura's UI never constructs a raw contract call — every read, write, and
+Obscura's UI never constructs a raw contract call. Every read, write, and
 decryption goes through a typed hook in
 [`apps/web/hooks`](https://github.com/Dominion116/Obscura/tree/main/apps/web/hooks).
 They are deliberately written as plain wagmi + viem + react-query so you can
@@ -22,7 +22,7 @@ lift them into your own project with minimal surgery.
 
 ## Reads
 
-### `useRegistryPairs()` — [`use-registry.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-registry.ts)
+### `useRegistryPairs()`: [`use-registry.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-registry.ts)
 
 Every registered pair, paged through the slice functions and enriched with
 symbols, names, decimals, `rate`, and TVS. Refetches every 60 s so new
@@ -32,21 +32,21 @@ hiding the pair.
 
 ```ts
 const { data: pairs, isLoading } = useRegistryPairs();
-// pairs: EnrichedPair[] — includes isValid, rate, tvs, wrapperDecimals…
+// pairs: EnrichedPair[], includes isValid, rate, tvs, wrapperDecimals...
 ```
 
-### `useUnderlyingBalance(tokenAddress)` — [`use-wrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-wrap.ts)
+### `useUnderlyingBalance(tokenAddress)`: [`use-wrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-wrap.ts)
 
 Live ERC-20 balance of the connected account, 30 s refetch.
 
-### `useConfidentialBalanceHandle(wrapper)` — [`use-decrypt.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-decrypt.ts)
+### `useConfidentialBalanceHandle(wrapper)`: [`use-decrypt.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-decrypt.ts)
 
 The `bytes32` balance handle for the connected account. Exposes the exported
 `ZERO_HANDLE` constant to detect never-funded accounts.
 
 ## Writes
 
-### `useWrapFlow(pair)` — [`use-wrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-wrap.ts)
+### `useWrapFlow(pair)`: [`use-wrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-wrap.ts)
 
 The full approve-then-wrap sequence behind one function, with per-step state
 for the UI (`idle → approving → wrapping → success`).
@@ -60,10 +60,10 @@ The live allowance is checked at the start of every run, so a retry never
 re-prompts for an approval that already exists, and the approval covers the
 rounded amount only.
 
-### `useUnwrapActions()` — [`use-unwrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-unwrap.ts)
+### `useUnwrapActions()`: [`use-unwrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-unwrap.ts)
 
 The two-step unwrap as a resumable state machine. Each transition persists to
-`localStorage` through `lib/unwrap-store`, so any step can fail and resume —
+`localStorage` through `lib/unwrap-store`, so any step can fail and resume,
 even after a page reload.
 
 ```ts
@@ -78,7 +78,7 @@ carries (request id? cleartext + proof?), recovers the request id from the tx
 receipt if the tab closed mid-flight, and detects requests someone else
 already finalized via `unwrapRequester`.
 
-### `useDecryptBalance(wrapper)` — [`use-decrypt.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-decrypt.ts)
+### `useDecryptBalance(wrapper)`: [`use-decrypt.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-decrypt.ts)
 
 User decryption behind a single call: throwaway keypair, EIP-712 signature,
 relayer round-trip. The cleartext lives in component state only.
@@ -102,14 +102,14 @@ await decrypt(handle); // step: idle → signing → decrypting
   invalidate the `erc20-balance`, `confidential-balance`, and `registry`
   query keys; an unwrap burn invalidates `confidential-balance` immediately
   (the balance shrinks at the burn, not at finalization). If you lift a hook,
-  keep its invalidations — they are what make the UI feel correct.
+  keep its invalidations; they are what make the UI feel correct.
 </Callout>
 
 ## Lifting them
 
 1. Copy `packages/shared` (ABIs, addresses, types) or install the
    equivalents.
-2. Copy `lib/fhevm.ts` and — if you take the unwrap hook —
+2. Copy `lib/fhevm.ts` and, if you take the unwrap hook,
    `lib/unwrap-store.ts`.
 3. Copy the hook files you need; they import nothing from Obscura's UI other
    than small formatting helpers you can inline.

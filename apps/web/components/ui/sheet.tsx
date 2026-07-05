@@ -2,7 +2,7 @@
 
 // Right-side drawer built on the Radix dialog primitive (PRD §12). Only the
 // right side is implemented because the pair actions drawer is the only
-// consumer — the explorer stays visible behind the overlay.
+// consumer, so the explorer stays visible behind the overlay.
 
 import * as React from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";

@@ -1,4 +1,4 @@
-/** Minimal structured console logger — enough to trace indexer progress and API requests. */
+/** Minimal structured console logger, enough to trace indexer progress and API requests. */
 
 function line(level: string, scope: string, message: string, meta?: object): void {
   const timestamp = new Date().toISOString();

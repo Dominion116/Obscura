@@ -1,5 +1,5 @@
 // Thin read client for the Obscura API (apps/api). Every call here is a
-// public, stateless GET against the indexer's cache — writes always go
+// public, stateless GET against the indexer's cache. Writes always go
 // on-chain, signed by the connected wallet, never through this client.
 
 import type {

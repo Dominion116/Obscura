@@ -3,7 +3,7 @@
 // Activity feed (PRD §7.7): a live stream of wraps, unwraps, registrations,
 // and revocations across the whole registry, backed by the indexer. Symbols
 // and decimals for display are joined in from the same live registry read
-// the explorer uses — the feed itself only ever stores public event data.
+// the explorer uses; the feed itself only ever stores public event data.
 
 import { useMemo, useState } from "react";
 import { Inbox, RefreshCw, ShieldAlert } from "lucide-react";
@@ -178,7 +178,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
         <p className="font-medium">Could not load the activity feed</p>
         <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
           The Obscura API may be unreachable. Unlike the registry, this feed
-          is built from indexed history — there is no direct on-chain
+          is built from indexed history, and there is no direct on-chain
           fallback.
         </p>
       </div>

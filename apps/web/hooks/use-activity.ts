@@ -2,8 +2,8 @@
 
 // Global activity feed (PRD §7.7): a live stream of wraps, unwraps,
 // registrations, and revocations, built entirely from public on-chain data
-// through the indexer. There's no meaningful on-chain fallback here — full
-// history requires the indexer — so an unreachable API surfaces as an error
+// through the indexer. There's no meaningful on-chain fallback here: full
+// history requires the indexer, so an unreachable API surfaces as an error
 // state instead of silently degrading.
 
 import { useQuery } from "@tanstack/react-query";

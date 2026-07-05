@@ -1,6 +1,6 @@
 ---
 title: Decrypt a Balance
-description: Read a confidential balance with the private user-decryption flow — handle, throwaway keypair, EIP-712 signature, relayer re-encryption.
+description: Read a confidential balance with the private user-decryption flow, handle, throwaway keypair, EIP-712 signature, relayer re-encryption.
 ---
 
 import { Callout, Steps } from "nextra/components";
@@ -8,7 +8,7 @@ import { Callout, Steps } from "nextra/components";
 # Decrypt a Balance
 
 A wrapper balance is a `bytes32` handle to an encrypted `euint64`. Turning it
-into a number the holder can see — without revealing it to anyone else — is
+into a number the holder can see, without revealing it to anyone else, is
 the **user decryption** flow: one typed-data signature, decrypted client-side.
 
 Snippets assume [Getting Started](/getting-started) plus the SDK singleton
@@ -29,7 +29,7 @@ const handle = await publicClient.readContract({
 
 const ZERO_HANDLE = `0x${"0".repeat(64)}`;
 if (handle === ZERO_HANDLE) {
-  // The account has never held this wrapper — nothing to decrypt.
+  // The account has never held this wrapper, so there's nothing to decrypt.
 }
 ```
 
@@ -98,7 +98,7 @@ const results = await instance.userDecrypt(
 
 ## Read the result
 
-Result keys are ciphertext handles, but their casing may not match yours —
+Result keys are ciphertext handles, but their casing may not match yours;
 normalize before lookup:
 
 ```ts
@@ -115,25 +115,25 @@ console.log(formatUnits(balance, 6)); // human-readable
 
 ## Why this is private
 
-- The **keypair is throwaway** — generated in the browser, used once,
+- The **keypair is throwaway**: generated in the browser, used once,
   never persisted.
 - The **signature scopes the grant**: specific contract addresses, explicit
   start timestamp, short duration.
-- The relayer re-encrypts the value **to the throwaway public key**; the
+- The relayer re-encrypts the value **to the throwaway public key**, so the
   cleartext exists only in the current browser session. Obscura never writes
   a decrypted balance anywhere.
 
 <Callout>
   Decryption only succeeds for accounts the FHEVM ACL allows on the handle.
   A wrapper automatically allows holders on their own balance handles, so
-  decrypting *your own* balance always works — decrypting someone else's
+  decrypting *your own* balance always works; decrypting someone else's
   fails at the relayer.
 </Callout>
 
 ## Decrypting several balances at once
 
 `userDecrypt` accepts multiple handle/contract pairs in one call, and
-`createEIP712` accepts multiple contract addresses — a portfolio view over
+`createEIP712` accepts multiple contract addresses, so a portfolio view over
 many wrappers needs **one signature**, not one per token. Obscura's portfolio
 decrypts each holding on demand instead, so the user only ever reveals what
 they ask to see:

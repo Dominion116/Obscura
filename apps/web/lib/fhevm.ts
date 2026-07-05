@@ -4,7 +4,7 @@
 // (input encryption, user decryption, public decryption) go through the
 // instance returned by getFhevmInstance so the SDK loads exactly once.
 //
-// The SDK ships WASM and must only ever load in the browser — every import
+// The SDK ships WASM and must only ever load in the browser, so every import
 // is dynamic and every caller is a client component.
 
 import type { FhevmInstance } from "@zama-fhe/relayer-sdk/web";
