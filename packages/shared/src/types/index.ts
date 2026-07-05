@@ -32,14 +32,32 @@ export type UnwrapStatus =
   | "finalized" // underlying tokens released
   | "failed"; // any step errored; retryable
 
+/**
+ * A persistable unwrap request record (JSON-safe: no bigints). The resume
+ * point after a failure is derived from which fields are present, so no
+ * separate "failed at" marker is needed. Note the wrapper contract uses the
+ * burned-amount ciphertext handle as the request id, so `unwrapRequestId`
+ * is also the handle that gets publicly decrypted.
+ */
 export interface UnwrapRequest {
-  unwrapRequestId: Hex;
+  /** Stable local key: the request transaction hash. */
+  key: string;
+  /** Wallet that initiated the unwrap (records are shown per account). */
+  account: Address;
   wrapper: Address;
+  wrapperSymbol: string;
+  wrapperDecimals: number;
+  tokenSymbol: string;
+  tokenDecimals: number;
+  /** Underlying base units per wrapped base unit, as a decimal string. */
+  rate: string;
   receiver: Address;
-  encryptedAmount: Hex;
-  cleartextAmount?: bigint;
   status: UnwrapStatus;
-  requestTxHash?: Hex;
+  requestTxHash: Hex;
+  unwrapRequestId?: Hex;
+  /** Cleartext wrapper base units, as a decimal string, after decryption. */
+  cleartextAmount?: string;
+  decryptionProof?: Hex;
   finalizeTxHash?: Hex;
   /** Last error message when status is "failed"; drives the retry path. */
   error?: string;
