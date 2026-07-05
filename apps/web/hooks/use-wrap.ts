@@ -104,8 +104,10 @@ export function useWrapFlow(pair: EnrichedPair) {
 
         setTxHash(hash);
         setStep("success");
-        // The underlying balance moved and the wrapper's TVS grew.
+        // The underlying balance moved, the confidential balance grew, and
+        // the wrapper's TVS changed.
         void queryClient.invalidateQueries({ queryKey: ["erc20-balance"] });
+        void queryClient.invalidateQueries({ queryKey: ["confidential-balance"] });
         void queryClient.invalidateQueries({ queryKey: ["registry"] });
         return hash;
       } catch (err) {
