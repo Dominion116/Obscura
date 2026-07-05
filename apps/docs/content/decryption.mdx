@@ -1,0 +1,167 @@
+---
+title: Decryption Model
+description: The two decryption paths in the Zama protocol — private user decryption for balances, public decryption for unwrap finalization — and when to use each.
+---
+
+import { Callout } from "nextra/components";
+
+# Decryption Model
+
+The protocol provides **two** ways to turn a ciphertext handle into a number,
+and they have opposite privacy properties. Keeping them distinct — in code
+and in the interface — is the single most important correctness decision in a
+confidential app.
+
+| | User decryption | Public decryption |
+| --- | --- | --- |
+| Who learns the value | Only the requesting user, in their browser session | Everyone, permanently |
+| Mechanism | EIP-712 signature binds a throwaway keypair; the relayer re-encrypts the value to it | The KMS decrypts and returns the cleartext plus a proof that contracts can verify |
+| Requires | The account to be ACL-allowed on the handle | The handle to have been made publicly decryptable by the contract |
+| Obscura uses it for | Reading confidential balances (Portfolio, Balance tab) | The unwrap amount during finalization — the only value the protocol *requires* to become public |
+
+<Callout type="error">
+  Never publicly decrypt a user's balance handle. Public decryption is
+  irreversible disclosure — once decrypted, the value is public forever. If
+  you find yourself reaching for `publicDecrypt` outside of unwrap
+  finalization, stop and reconsider.
+</Callout>
+
+## Setting up the Relayer SDK
+
+Both paths go through the [Zama Relayer SDK](https://docs.zama.org/protocol).
+It ships WASM and is **browser-only**; load it once and reuse the instance:
+
+```ts filename="fhevm.ts"
+import type { FhevmInstance } from "@zama-fhe/relayer-sdk/web";
+
+let instancePromise: Promise<FhevmInstance> | null = null;
+
+export function getFhevmInstance(): Promise<FhevmInstance> {
+  if (!instancePromise) {
+    instancePromise = (async () => {
+      const { initSDK, createInstance, SepoliaConfig } = await import(
+        "@zama-fhe/relayer-sdk/web"
+      );
+      await initSDK(); // loads the WASM
+      return createInstance({
+        ...SepoliaConfig,
+        network: window.ethereum, // or an RPC URL string
+      });
+    })().catch((error) => {
+      instancePromise = null; // allow a retry instead of caching the failure
+      throw error;
+    });
+  }
+  return instancePromise;
+}
+```
+
+<Callout type="warning">
+  The SDK's threaded WASM needs `SharedArrayBuffer`, which browsers only
+  enable on cross-origin-isolated pages. Serve your app with these headers
+  (Next.js example):
+
+```ts filename="next.config.ts"
+async headers() {
+  return [{
+    source: "/:path*",
+    headers: [
+      { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+      { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+    ],
+  }];
+}
+```
+</Callout>
+
+## User decryption (private)
+
+The user generates a **throwaway keypair**, signs an EIP-712 message that
+authorizes it for specific contracts and a time window, and the relayer
+returns the value re-encrypted to that keypair. The cleartext exists only in
+the current browser session.
+
+```ts
+import { getFhevmInstance } from "./fhevm";
+
+const instance = await getFhevmInstance();
+const keypair = instance.generateKeypair();
+const startTimestamp = Math.floor(Date.now() / 1000);
+const durationDays = 1; // keep the grant short-lived
+
+const eip712 = instance.createEIP712(
+  keypair.publicKey,
+  [wrapperAddress],
+  startTimestamp,
+  durationDays,
+);
+
+// Rebuild domain and types for viem: the SDK's raw eip712 object carries an
+// EIP712Domain entry and non-primitive field types that signTypedData rejects.
+const signature = await walletClient.signTypedData({
+  account,
+  domain: {
+    name: eip712.domain.name,
+    version: eip712.domain.version,
+    chainId: Number(eip712.domain.chainId),
+    verifyingContract: eip712.domain.verifyingContract,
+  },
+  types: {
+    UserDecryptRequestVerification: [
+      { name: "publicKey", type: "bytes" },
+      { name: "contractAddresses", type: "address[]" },
+      { name: "startTimestamp", type: "uint256" },
+      { name: "durationDays", type: "uint256" },
+      { name: "extraData", type: "bytes" },
+    ],
+  },
+  primaryType: "UserDecryptRequestVerification",
+  message: {
+    publicKey: eip712.message.publicKey,
+    contractAddresses: [...eip712.message.contractAddresses],
+    startTimestamp: BigInt(eip712.message.startTimestamp),
+    durationDays: BigInt(eip712.message.durationDays),
+    extraData: eip712.message.extraData,
+  },
+});
+
+const results = await instance.userDecrypt(
+  [{ handle, contractAddress: wrapperAddress }],
+  keypair.privateKey,
+  keypair.publicKey,
+  signature.replace(/^0x/, ""), // the SDK expects the signature without 0x
+  [wrapperAddress],
+  account,
+  startTimestamp,
+  durationDays,
+);
+
+const balance = results[handle]; // bigint, in wrapper base units
+```
+
+This only succeeds if `account` is ACL-allowed on `handle` — which a wrapper
+guarantees for a holder's own balance handle. The full working version, with
+error handling and result-key normalization, is
+[`use-decrypt.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-decrypt.ts);
+the step-by-step guide is [Decrypt a Balance](/guides/decrypt-a-balance).
+
+## Public decryption
+
+Used exactly once in the wrapper lifecycle: the unwrap request burns an
+encrypted amount and marks that ciphertext publicly decryptable, because
+`finalizeUnwrap` must be told — and must verify — the cleartext it releases.
+
+```ts
+const instance = await getFhevmInstance();
+
+// unwrapRequestId doubles as the burned-amount ciphertext handle
+const result = await instance.publicDecrypt([unwrapRequestId]);
+
+const cleartext = result.clearValues[unwrapRequestId]; // bigint
+const proof = result.decryptionProof;                  // verified on-chain
+```
+
+The proof is what makes this safe: `finalizeUnwrap` rejects any cleartext the
+KMS did not actually sign off on (`InvalidKMSSignatures`). See
+[Unwrap Tokens](/guides/unwrap) for the full flow, including the retry window
+while the relayer prepares the decryption.

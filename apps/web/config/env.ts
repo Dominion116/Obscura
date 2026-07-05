@@ -7,4 +7,6 @@ export const env = {
     process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL ??
     "https://ethereum-sepolia-rpc.publicnode.com",
   apiUrl: process.env.NEXT_PUBLIC_API_URL ?? "",
+  // The developer reference is a separate Nextra site (apps/docs).
+  docsUrl: process.env.NEXT_PUBLIC_DOCS_URL ?? "http://localhost:3001",
 } as const;

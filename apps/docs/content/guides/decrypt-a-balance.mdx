@@ -1,0 +1,140 @@
+---
+title: Decrypt a Balance
+description: Read a confidential balance with the private user-decryption flow — handle, throwaway keypair, EIP-712 signature, relayer re-encryption.
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Decrypt a Balance
+
+A wrapper balance is a `bytes32` handle to an encrypted `euint64`. Turning it
+into a number the holder can see — without revealing it to anyone else — is
+the **user decryption** flow: one typed-data signature, decrypted client-side.
+
+Snippets assume [Getting Started](/getting-started) plus the SDK singleton
+and COOP/COEP headers from the
+[Decryption Model](/decryption#setting-up-the-relayer-sdk).
+
+<Steps>
+
+## Read the handle
+
+```ts
+const handle = await publicClient.readContract({
+  address: wrapper,
+  abi: wrapperAbi,
+  functionName: "confidentialBalanceOf",
+  args: [account],
+});
+
+const ZERO_HANDLE = `0x${"0".repeat(64)}`;
+if (handle === ZERO_HANDLE) {
+  // The account has never held this wrapper — nothing to decrypt.
+}
+```
+
+An all-zero handle means no balance ciphertext exists yet; show "0" and skip
+the decryption entirely.
+
+## Sign and decrypt
+
+The user generates a throwaway keypair, authorizes it with an EIP-712
+signature scoped to this wrapper and a short time window, and the relayer
+returns the balance re-encrypted to that keypair:
+
+```ts
+import { getFhevmInstance } from "./fhevm";
+
+const instance = await getFhevmInstance();
+const keypair = instance.generateKeypair();
+const startTimestamp = Math.floor(Date.now() / 1000);
+const durationDays = 1; // one decryption session, not a standing grant
+
+const eip712 = instance.createEIP712(
+  keypair.publicKey,
+  [wrapper],
+  startTimestamp,
+  durationDays,
+);
+
+const signature = await walletClient.signTypedData({
+  account,
+  domain: {
+    name: eip712.domain.name,
+    version: eip712.domain.version,
+    chainId: Number(eip712.domain.chainId),
+    verifyingContract: eip712.domain.verifyingContract,
+  },
+  types: {
+    UserDecryptRequestVerification: [
+      { name: "publicKey", type: "bytes" },
+      { name: "contractAddresses", type: "address[]" },
+      { name: "startTimestamp", type: "uint256" },
+      { name: "durationDays", type: "uint256" },
+      { name: "extraData", type: "bytes" },
+    ],
+  },
+  primaryType: "UserDecryptRequestVerification",
+  message: {
+    publicKey: eip712.message.publicKey,
+    contractAddresses: [...eip712.message.contractAddresses],
+    startTimestamp: BigInt(eip712.message.startTimestamp),
+    durationDays: BigInt(eip712.message.durationDays),
+    extraData: eip712.message.extraData,
+  },
+});
+
+const results = await instance.userDecrypt(
+  [{ handle, contractAddress: wrapper }],
+  keypair.privateKey,
+  keypair.publicKey,
+  signature.replace(/^0x/, ""), // SDK expects the signature without the 0x prefix
+  [wrapper],
+  account,
+  startTimestamp,
+  durationDays,
+);
+```
+
+## Read the result
+
+Result keys are ciphertext handles, but their casing may not match yours —
+normalize before lookup:
+
+```ts
+const key = Object.keys(results).find(
+  (k) => k.toLowerCase() === handle.toLowerCase(),
+);
+const balance = results[key!] as bigint; // wrapper base units (6 decimals)
+
+import { formatUnits } from "viem";
+console.log(formatUnits(balance, 6)); // human-readable
+```
+
+</Steps>
+
+## Why this is private
+
+- The **keypair is throwaway** — generated in the browser, used once,
+  never persisted.
+- The **signature scopes the grant**: specific contract addresses, explicit
+  start timestamp, short duration.
+- The relayer re-encrypts the value **to the throwaway public key**; the
+  cleartext exists only in the current browser session. Obscura never writes
+  a decrypted balance anywhere.
+
+<Callout>
+  Decryption only succeeds for accounts the FHEVM ACL allows on the handle.
+  A wrapper automatically allows holders on their own balance handles, so
+  decrypting *your own* balance always works — decrypting someone else's
+  fails at the relayer.
+</Callout>
+
+## Decrypting several balances at once
+
+`userDecrypt` accepts multiple handle/contract pairs in one call, and
+`createEIP712` accepts multiple contract addresses — a portfolio view over
+many wrappers needs **one signature**, not one per token. Obscura's portfolio
+decrypts each holding on demand instead, so the user only ever reveals what
+they ask to see:
+[`use-portfolio.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-portfolio.ts).

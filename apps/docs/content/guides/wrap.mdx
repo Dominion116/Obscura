@@ -1,0 +1,140 @@
+---
+title: Wrap Tokens
+description: Approve-then-wrap with correct decimal rounding — the amount preview, the exact allowance, and the Wrap event.
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Wrap Tokens
+
+Wrapping turns an ERC-20 into its confidential twin. It is the simplest flow
+on the wrapper — two transactions, no FHE tooling — but the decimal rounding
+is where interfaces quietly go wrong. Snippets assume the setup from
+[Getting Started](/getting-started).
+
+## The rounding rule
+
+Wrappers hold amounts as `euint64` with **6 decimals**; underlying tokens
+usually have 18. `rate()` is the conversion factor between the two
+(`10^12` for an 18-decimal token). When you call `wrap(to, amount)`:
+
+- the contract rounds `amount` **down** to a multiple of `rate`,
+- pulls only the **rounded** amount from your wallet,
+- mints `roundedAmount / rate` wrapper base units to `to`.
+
+The sub-`rate` remainder never leaves your wallet. Compute and show both
+numbers before asking for a signature:
+
+```ts
+const rate = await publicClient.readContract({
+  address: wrapper,
+  abi: wrapperAbi,
+  functionName: "rate",
+});
+
+const roundedAmount = amount - (amount % rate); // pulled and wrapped
+const remainder = amount - roundedAmount;       // stays in the wallet
+```
+
+<Callout type="warning">
+  **Approve `roundedAmount`, not `amount`.** The wrapper only ever pulls the
+  rounded value. Approving the raw amount works, but leaves a stale residual
+  allowance on the token — poor hygiene, and some tokens (USDT-style) revert
+  on non-zero → non-zero approvals.
+</Callout>
+
+## The flow
+
+<Steps>
+
+### Check validity
+
+Re-check the pair right before writing — revocation can happen at any time:
+
+```ts
+const isValid = await publicClient.readContract({
+  address: REGISTRY,
+  abi: registryAbi,
+  functionName: "isConfidentialTokenValid",
+  args: [wrapper],
+});
+if (!isValid) throw new Error("This wrapper has been revoked");
+```
+
+### Approve (only when needed)
+
+Check the live allowance first, so a retry after a failed wrap never
+re-prompts for an approval that is already in place:
+
+```ts
+const allowance = await publicClient.readContract({
+  address: token,
+  abi: erc20Abi,
+  functionName: "allowance",
+  args: [account, wrapper],
+});
+
+if (allowance < roundedAmount) {
+  const hash = await walletClient.writeContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: "approve",
+    args: [wrapper, roundedAmount],
+    account,
+  });
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  if (receipt.status !== "success") throw new Error("Approval reverted");
+}
+```
+
+### Wrap
+
+```ts
+const hash = await walletClient.writeContract({
+  address: wrapper,
+  abi: wrapperAbi,
+  functionName: "wrap",
+  args: [account, amount], // unrounded is fine — the contract rounds down
+  account,
+});
+const receipt = await publicClient.waitForTransactionReceipt({ hash });
+if (receipt.status !== "success") throw new Error("Wrap reverted");
+```
+
+### Confirm
+
+The `Wrap` event carries the public rounded amount and the handle of the
+minted encrypted amount:
+
+```ts
+import { parseEventLogs } from "viem";
+
+const [wrapEvent] = parseEventLogs({
+  abi: wrapperAbi,
+  eventName: "Wrap",
+  logs: receipt.logs,
+});
+// wrapEvent.args.roundedAmount        → underlying base units, public
+// wrapEvent.args.encryptedWrappedAmount → euint64 handle
+```
+
+</Steps>
+
+## Failure modes to handle
+
+| Error | Meaning | Your move |
+| --- | --- | --- |
+| `RevokedConfidentialToken` | Pair was revoked | Re-read the registry; block the wrap |
+| `BlockedUser` | Address is on the wrapper's block list | Surface plainly; nothing to retry |
+| ERC-20 `transferFrom` failure / `SafeERC20FailedOperation` | Allowance or balance too low | Re-check allowance and balance, retry |
+| `ERC7984TotalSupplyOverflow` | Wrap would exceed the `uint64` supply cap | Reduce the amount |
+
+The production implementation — one call that sequences allowance check,
+approval, wrap, and cache invalidation with per-step status — is
+[`use-wrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-wrap.ts).
+
+## After the wrap
+
+Your confidential balance is now a ciphertext handle. To show the user their
+new balance, run [user decryption](/guides/decrypt-a-balance); to move it
+privately, see [Confidential Transfer](/guides/transfer).

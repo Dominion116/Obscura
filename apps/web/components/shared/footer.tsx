@@ -4,13 +4,13 @@ import {
   explorerAddressUrl,
 } from "@obscura/shared";
 import { shortAddress } from "@/lib/utils";
+import { env } from "@/config/env";
 
 const productLinks = [
   { href: "/registry", label: "Registry" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/faucet", label: "Faucet" },
   { href: "/activity", label: "Activity" },
-  { href: "/developers", label: "Developers" },
 ];
 
 export function Footer() {
@@ -46,6 +46,14 @@ export function Footer() {
         <nav aria-label="Resources">
           <p className="text-sm font-semibold">Resources</p>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+            <li>
+              <a
+                href={env.docsUrl}
+                className="transition-colors hover:text-foreground"
+              >
+                Developer docs
+              </a>
+            </li>
             <li>
               <a
                 href="https://github.com/Dominion116"

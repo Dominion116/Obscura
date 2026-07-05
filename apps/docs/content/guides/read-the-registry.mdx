@@ -1,0 +1,140 @@
+---
+title: Read the Registry
+description: Enumerate every ERC-20 ↔ ERC-7984 pair with the slice functions, look up single tokens, and enrich pairs with symbols, rates, and TVS.
+---
+
+import { Callout } from "nextra/components";
+
+# Read the Registry
+
+Everything on this page is a free `view` call — no wallet, no SDK. The
+snippets assume the `publicClient` and ABIs from
+[Getting Started](/getting-started).
+
+## List every pair
+
+The registry exposes `getTokenConfidentialTokenPairs()` for the whole list,
+but paging with the slice functions is the pattern that keeps working as the
+registry grows:
+
+```ts
+const SLICE_SIZE = 50n;
+
+async function fetchAllPairs() {
+  const length = await publicClient.readContract({
+    address: REGISTRY,
+    abi: registryAbi,
+    functionName: "getTokenConfidentialTokenPairsLength",
+  });
+
+  const pairs = [];
+  for (let from = 0n; from < length; from += SLICE_SIZE) {
+    const to = from + SLICE_SIZE < length ? from + SLICE_SIZE : length;
+    const slice = await publicClient.readContract({
+      address: REGISTRY,
+      abi: registryAbi,
+      functionName: "getTokenConfidentialTokenPairsSlice",
+      args: [from, to],
+    });
+    pairs.push(...slice);
+  }
+  return pairs; // { tokenAddress, confidentialTokenAddress, isValid }[]
+}
+```
+
+`toIndex` is exclusive, and `fromIndex >= toIndex` reverts with
+`FromIndexGreaterOrEqualToIndex` — the loop above never triggers it.
+
+<Callout type="warning">
+  Revoked pairs are **not removed** from this list; they come back with
+  `isValid: false`. Render them (users may still hold the wrapper and need to
+  unwrap), but block new wraps into them.
+</Callout>
+
+## Look up a single token
+
+Both lookups return a `(bool, address)` tuple where the flag tells you
+whether the pairing is currently valid:
+
+```ts
+// Token → wrapper
+const [isValid, wrapper] = await publicClient.readContract({
+  address: REGISTRY,
+  abi: registryAbi,
+  functionName: "getConfidentialTokenAddress",
+  args: [tokenAddress],
+});
+
+// Wrapper → token (add to the registryAbi from Getting Started):
+//   "function getTokenAddress(address confidentialTokenAddress) view returns (bool, address)"
+const [tokenIsValid, token] = await publicClient.readContract({
+  address: REGISTRY,
+  abi: registryAbi,
+  functionName: "getTokenAddress",
+  args: [wrapperAddress],
+});
+```
+
+Treat anything other than `[true, address]` as unusable, and wrap lookups in
+a `try/catch` — depending on registry state a lookup for an unknown address
+can revert (`TokenNotRegistered`, `NoTokenAssociatedWithConfidentialToken`).
+
+To re-check validity right before a write:
+
+```ts
+const stillValid = await publicClient.readContract({
+  address: REGISTRY,
+  abi: registryAbi,
+  functionName: "isConfidentialTokenValid",
+  args: [wrapperAddress],
+});
+```
+
+## Enrich pairs for display
+
+The registry stores addresses and validity — symbols, decimals, rates, and
+TVS come from the token contracts themselves. Fan the reads out with
+`Promise.allSettled` so one misbehaving token degrades to placeholders
+instead of hiding the pair (viem batches these into a single multicall):
+
+```ts
+const wrapper = { address: pair.confidentialTokenAddress, abi: wrapperAbi } as const;
+const token = { address: pair.tokenAddress, abi: erc20Abi } as const;
+
+const [symbol, decimals, rate, tvs] = await Promise.allSettled([
+  publicClient.readContract({ ...token, functionName: "symbol" }),
+  publicClient.readContract({ ...token, functionName: "decimals" }),
+  publicClient.readContract({ ...wrapper, functionName: "rate" }),
+  publicClient.readContract({ ...wrapper, functionName: "inferredTotalSupply" }),
+]);
+```
+
+`inferredTotalSupply()` is the wrapper's outstanding supply in **underlying
+base units** — Obscura surfaces it as Total Value Shielded per pair.
+
+The production version of this whole page is one hook:
+[`use-registry.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-registry.ts),
+which additionally refetches on an interval so newly registered or revoked
+pairs appear without a redeploy.
+
+## Watch for changes
+
+To react to registry changes instead of polling state, index the two events:
+
+```ts
+// "event ConfidentialTokenRegistered(address indexed tokenAddress, address indexed confidentialTokenAddress)"
+// "event ConfidentialTokenRevoked(address indexed tokenAddress, address indexed confidentialTokenAddress)"
+const logs = await publicClient.getLogs({
+  address: REGISTRY,
+  events: parseAbi([
+    "event ConfidentialTokenRegistered(address indexed tokenAddress, address indexed confidentialTokenAddress)",
+    "event ConfidentialTokenRevoked(address indexed tokenAddress, address indexed confidentialTokenAddress)",
+  ]),
+  fromBlock,
+  toBlock,
+});
+```
+
+Obscura's indexer (`apps/api`) does exactly this, with resumable block state
+and a periodic direct-state reconcile as a safety net — see the
+[REST API reference](/reference/api) if you would rather consume the result.
