@@ -32,7 +32,7 @@ async function saveCursor(contract: string, block: bigint): Promise<void> {
 /**
  * Scan [fromBlock, toBlock] in bounded chunks, retrying a failed chunk with
  * backoff before giving up, and persisting the cursor after every chunk that
- * succeeds — a crash mid-scan resumes just past the last completed chunk
+ * succeeds, so a crash mid-scan resumes just past the last completed chunk
  * instead of re-scanning from the start or silently skipping ahead.
  *
  * `logs` are typed loosely because a multi-event scan returns a union of

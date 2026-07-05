@@ -3,7 +3,7 @@
 // Unwrap tab of the pair actions drawer (PRD §7.3). Runs the two-step flow
 // through useUnwrapActions and renders the live state of every request for
 // this pair, so an interrupted unwrap is always one click from resuming.
-// Note: revoked wrappers can still unwrap — only wrapping is blocked.
+// Note: revoked wrappers can still unwrap; only wrapping is blocked.
 
 import { useMemo, useState } from "react";
 import { formatUnits } from "viem";
@@ -76,7 +76,7 @@ export function UnwrapForm({ pair }: { pair: EnrichedPair }) {
       {!pair.isValid && (
         <p className="flex items-start gap-2 rounded-xl border border-border bg-card p-3 text-sm text-muted-foreground">
           <Info className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-          This wrapper is revoked, so wrapping is disabled — but unwrapping
+          This wrapper is revoked, so wrapping is disabled, but unwrapping
           back to {pair.tokenSymbol} still works.
         </p>
       )}

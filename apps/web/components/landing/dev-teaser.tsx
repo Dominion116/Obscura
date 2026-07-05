@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BlurReveal } from "@/components/shared/blur-reveal";
+import { env } from "@/config/env";
 
 const snippet = `import { registryAbi, WRAPPERS_REGISTRY_ADDRESS } from "@obscura/shared";
 
@@ -13,7 +13,7 @@ const pairs = await client.readContract({
 });
 
 pairs.forEach(({ tokenAddress, confidentialTokenAddress, isValid }) => {
-  // always honour isValid — revoked wrappers must not be used
+  // always honour isValid, since revoked wrappers must not be used
 });`;
 
 export function DevTeaser() {
@@ -27,16 +27,16 @@ export function DevTeaser() {
           </h2>
           <p className="mt-6 text-lg text-muted-foreground">
             Obscura is a reference implementation you can read and lift. Every
-            hook the app uses — reading pairs, wrapping, the two-step unwrap,
-            decryption — is documented with copy-ready snippets.
+            hook the app uses (reading pairs, wrapping, the two-step unwrap,
+            decryption) is documented with copy-ready snippets.
           </p>
-          <Link
-            href="/developers"
+          <a
+            href={env.docsUrl}
             className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
             Open the developer reference
             <ArrowRight className="size-4" aria-hidden />
-          </Link>
+          </a>
         </BlurReveal>
         <BlurReveal delay={0.15} className="min-w-0">
           {/* pre-wrap: long lines continue on the next line instead of

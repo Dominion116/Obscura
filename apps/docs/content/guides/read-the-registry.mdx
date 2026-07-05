@@ -7,7 +7,7 @@ import { Callout } from "nextra/components";
 
 # Read the Registry
 
-Everything on this page is a free `view` call — no wallet, no SDK. The
+Everything on this page is a free `view` call: no wallet, no SDK. The
 snippets assume the `publicClient` and ABIs from
 [Getting Started](/getting-started).
 
@@ -43,7 +43,7 @@ async function fetchAllPairs() {
 ```
 
 `toIndex` is exclusive, and `fromIndex >= toIndex` reverts with
-`FromIndexGreaterOrEqualToIndex` — the loop above never triggers it.
+`FromIndexGreaterOrEqualToIndex`; the loop above never triggers it.
 
 <Callout type="warning">
   Revoked pairs are **not removed** from this list; they come back with
@@ -76,7 +76,7 @@ const [tokenIsValid, token] = await publicClient.readContract({
 ```
 
 Treat anything other than `[true, address]` as unusable, and wrap lookups in
-a `try/catch` — depending on registry state a lookup for an unknown address
+a `try/catch`: depending on registry state a lookup for an unknown address
 can revert (`TokenNotRegistered`, `NoTokenAssociatedWithConfidentialToken`).
 
 To re-check validity right before a write:
@@ -92,7 +92,7 @@ const stillValid = await publicClient.readContract({
 
 ## Enrich pairs for display
 
-The registry stores addresses and validity — symbols, decimals, rates, and
+The registry stores addresses and validity. Symbols, decimals, rates, and
 TVS come from the token contracts themselves. Fan the reads out with
 `Promise.allSettled` so one misbehaving token degrades to placeholders
 instead of hiding the pair (viem batches these into a single multicall):
@@ -110,7 +110,7 @@ const [symbol, decimals, rate, tvs] = await Promise.allSettled([
 ```
 
 `inferredTotalSupply()` is the wrapper's outstanding supply in **underlying
-base units** — Obscura surfaces it as Total Value Shielded per pair.
+base units**. Obscura surfaces it as Total Value Shielded per pair.
 
 The production version of this whole page is one hook:
 [`use-registry.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-registry.ts),
@@ -136,5 +136,5 @@ const logs = await publicClient.getLogs({
 ```
 
 Obscura's indexer (`apps/api`) does exactly this, with resumable block state
-and a periodic direct-state reconcile as a safety net — see the
+and a periodic direct-state reconcile as a safety net; see the
 [REST API reference](/reference/api) if you would rather consume the result.

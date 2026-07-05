@@ -26,7 +26,7 @@ export function formatTokenAmount(
  * when they are; a zero rate means the read failed and renders as a dash.
  */
 export function formatRate(rate: bigint): string {
-  if (rate <= 0n) return "—";
+  if (rate <= 0n) return "-";
   if (rate === 1n) return "1 : 1";
   const digits = rate.toString();
   if (/^10*$/.test(digits)) return `10^${digits.length - 1} : 1`;

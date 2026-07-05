@@ -19,7 +19,7 @@ export const appKit =
         metadata: {
           name: "Obscura",
           description:
-            "Confidential Wrapper Registry — wrap, unwrap, and decrypt ERC-7984 confidential tokens on Sepolia",
+            "Confidential Wrapper Registry: wrap, unwrap, and decrypt ERC-7984 confidential tokens on Sepolia",
           url: window.location.origin,
           icons: [],
         },

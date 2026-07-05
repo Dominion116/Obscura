@@ -2,7 +2,7 @@
   "name": "obscura",
   "private": true,
   "version": "0.1.0",
-  "description": "Confidential Wrapper Registry App — browse, wrap, unwrap, and decrypt ERC-7984 confidential tokens on Sepolia",
+  "description": "Confidential Wrapper Registry App: browse, wrap, unwrap, and decrypt ERC-7984 confidential tokens on Sepolia",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",

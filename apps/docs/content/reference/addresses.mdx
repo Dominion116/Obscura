@@ -15,8 +15,8 @@ import {
 
 All contracts live on **Ethereum Sepolia** (chain id {SEPOLIA_CHAIN_ID}).
 This page is rendered from
-[`packages/shared/src/addresses/sepolia.ts`](https://github.com/Dominion116/Obscura/blob/main/packages/shared/src/addresses/sepolia.ts)
-— the same module the app and the indexer import — so it cannot drift from
+[`packages/shared/src/addresses/sepolia.ts`](https://github.com/Dominion116/Obscura/blob/main/packages/shared/src/addresses/sepolia.ts),
+the same module the app and the indexer import, so it cannot drift from
 what Obscura actually uses.
 
 ## Registry
@@ -48,7 +48,7 @@ what Obscura actually uses.
 
 <Callout>
   **The on-chain registry is the source of truth.** This table is the
-  convenience snapshot Obscura ships for the faucet and offline reference —
+  convenience snapshot Obscura ships for the faucet and offline reference;
   new pairs appear in the registry (and in Obscura) without any code change.
   Enumerate the registry itself for a complete, current list:
   [Read the Registry](/guides/read-the-registry).
@@ -89,7 +89,7 @@ what Obscura actually uses.
   </table>
 </div>
 
-The mock underlying tokens are freely mintable on Sepolia — the Obscura app's
+The mock underlying tokens are freely mintable on Sepolia. The Obscura app's
 **Faucet** page mints them to any connected wallet so you always have
 something to wrap.
 

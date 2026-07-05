@@ -53,7 +53,7 @@ const defaultProps: Feature17Props = {
       icon: <Send className="size-5" />,
       title: "Hold or transfer privately",
       description:
-        "Your balance is encrypted on chain. Transfer with the amount hidden — only you can decrypt what you hold.",
+        "Your balance is encrypted on chain. Transfer with the amount hidden, so only you can decrypt what you hold.",
     },
     {
       icon: <Unlock className="size-5" />,

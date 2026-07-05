@@ -17,7 +17,7 @@ export function NetworkBadge() {
       )}
       title={
         wrongNetwork
-          ? "Connected to the wrong network — switch to Sepolia"
+          ? "Connected to the wrong network. Switch to Sepolia"
           : "Obscura runs on Ethereum Sepolia"
       }
     >

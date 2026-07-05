@@ -4,8 +4,8 @@ import { parseUnits } from "viem";
 // ERC7984ERC20Wrapper.wrap exactly:
 //   roundedAmount = amount - (amount % rate)   // pulled from the wallet
 //   wrapped       = amount / rate              // minted, must fit uint64
-// The remainder never leaves the wallet — the wrapper only transfers the
-// rounded amount — so the preview says "stays in your wallet", not "refund".
+// The remainder never leaves the wallet: the wrapper only transfers the
+// rounded amount, so the preview says "stays in your wallet", not "refund".
 
 export const MAX_UINT64 = 2n ** 64n - 1n;
 

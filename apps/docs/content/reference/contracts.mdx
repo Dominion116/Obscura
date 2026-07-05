@@ -5,8 +5,8 @@ description: The registry and wrapper functions, events, and errors an integrato
 
 # Contract Surface
 
-The subset of the verified ABIs an integrator actually touches. Full ABIs —
-Sourcify exact-match, extracted from the deployed implementations — live in
+The subset of the verified ABIs an integrator actually touches. Full ABIs,
+Sourcify exact-match, extracted from the deployed implementations, live in
 [`packages/shared/src/abis`](https://github.com/Dominion116/Obscura/tree/main/packages/shared/src/abis).
 
 ## Registry
@@ -56,7 +56,7 @@ struct TokenWrapperPair {
 | `underlying()` | `address` | The wrapped ERC-20 |
 | `rate()` | `uint256` | Underlying units per wrapper unit; drives rounding |
 | `decimals()` | `uint8` | Wrapper decimals (6) |
-| `inferredTotalSupply()` | `uint256` | Outstanding supply in underlying units — Total Value Shielded |
+| `inferredTotalSupply()` | `uint256` | Outstanding supply in underlying units: Total Value Shielded |
 | `maxTotalSupply()` | `uint256` | `uint64` cap in underlying units |
 
 ### Wrap and unwrap
@@ -114,5 +114,5 @@ struct TokenWrapperPair {
 | `ERC7984TotalSupplyOverflow()` | Wrap would exceed the `uint64` cap | Amount too large |
 
 Both contracts are UUPS proxies (`Upgraded` event, `upgradeToAndCall`) owned
-by Zama — pin your integration to the **proxy** addresses on the
+by Zama. Pin your integration to the **proxy** addresses on the
 [addresses page](/reference/addresses), never to implementations.

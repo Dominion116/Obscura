@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-// Resumable, gap-free indexing (PRD §9): one cursor document per contract —
+// Resumable, gap-free indexing (PRD §9): one cursor document per contract,
 // "registry" for the registry itself, and one keyed by wrapper address for
 // each pair's Wrap/Unwrap event scan. A crash or restart resumes from
 // lastProcessedBlock + 1 instead of re-scanning or losing ground.

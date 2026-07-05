@@ -1,6 +1,6 @@
 ---
 title: REST API
-description: Obscura's read-only indexer API — pairs, activity feed, TVS history, stats, and health — serving only public on-chain data.
+description: Obscura's read-only indexer API, pairs, activity feed, TVS history, stats, and health, serving only public on-chain data.
 ---
 
 import { Callout } from "nextra/components";
@@ -9,7 +9,7 @@ import { Callout } from "nextra/components";
 
 Obscura's indexer (`apps/api`, Node + Express + MongoDB) listens to registry
 and wrapper events and serves fast cached reads. It exists so lists, feeds,
-and charts don't hammer an RPC — every write still happens on-chain from the
+and charts don't hammer an RPC. Every write still happens on-chain from the
 user's wallet, and the API is stateless with respect to user identity.
 
 <Callout>
@@ -18,7 +18,7 @@ user's wallet, and the API is stateless with respect to user identity.
   It never sees, stores, or serves anything encrypted.
 </Callout>
 
-All routes are mounted under `/api`. Base URL is deployment-specific — the
+All routes are mounted under `/api`. Base URL is deployment-specific; the
 web app reads it from `NEXT_PUBLIC_API_URL`.
 
 ## Endpoints
@@ -63,7 +63,7 @@ web app reads it from `NEXT_PUBLIC_API_URL`.
 }
 ```
 
-`publicAmount` is only present where the amount is public by nature — wraps
+`publicAmount` is only present where the amount is public by nature: wraps
 and finalized unwraps. Confidential transfers appear as events without an
 amount.
 
@@ -91,7 +91,7 @@ const API = process.env.NEXT_PUBLIC_API_URL; // e.g. https://api.your-deploy.app
 const stats = await fetch(`${API}/api/stats`).then((r) => r.json());
 ```
 
-The web app treats the API as an accelerator, not a dependency — pair data
+The web app treats the API as an accelerator, not a dependency. Pair data
 always has the on-chain read path
 ([Read the Registry](/guides/read-the-registry)) as its source of truth, and
 the indexer itself periodically reconciles against direct registry state so

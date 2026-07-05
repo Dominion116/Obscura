@@ -1,6 +1,6 @@
 ---
 title: Decryption Model
-description: The two decryption paths in the Zama protocol — private user decryption for balances, public decryption for unwrap finalization — and when to use each.
+description: The two decryption paths in the Zama protocol, private user decryption for balances, public decryption for unwrap finalization, and when to use each.
 ---
 
 import { Callout } from "nextra/components";
@@ -8,8 +8,8 @@ import { Callout } from "nextra/components";
 # Decryption Model
 
 The protocol provides **two** ways to turn a ciphertext handle into a number,
-and they have opposite privacy properties. Keeping them distinct — in code
-and in the interface — is the single most important correctness decision in a
+and they have opposite privacy properties. Keeping them distinct, in code
+and in the interface, is the single most important correctness decision in a
 confidential app.
 
 | | User decryption | Public decryption |
@@ -17,11 +17,11 @@ confidential app.
 | Who learns the value | Only the requesting user, in their browser session | Everyone, permanently |
 | Mechanism | EIP-712 signature binds a throwaway keypair; the relayer re-encrypts the value to it | The KMS decrypts and returns the cleartext plus a proof that contracts can verify |
 | Requires | The account to be ACL-allowed on the handle | The handle to have been made publicly decryptable by the contract |
-| Obscura uses it for | Reading confidential balances (Portfolio, Balance tab) | The unwrap amount during finalization — the only value the protocol *requires* to become public |
+| Obscura uses it for | Reading confidential balances (Portfolio, Balance tab) | The unwrap amount during finalization, the only value the protocol *requires* to become public |
 
 <Callout type="error">
   Never publicly decrypt a user's balance handle. Public decryption is
-  irreversible disclosure — once decrypted, the value is public forever. If
+  irreversible disclosure: once decrypted, the value is public forever. If
   you find yourself reaching for `publicDecrypt` outside of unwrap
   finalization, stop and reconsider.
 </Callout>
@@ -139,7 +139,7 @@ const results = await instance.userDecrypt(
 const balance = results[handle]; // bigint, in wrapper base units
 ```
 
-This only succeeds if `account` is ACL-allowed on `handle` — which a wrapper
+This only succeeds if `account` is ACL-allowed on `handle`, which a wrapper
 guarantees for a holder's own balance handle. The full working version, with
 error handling and result-key normalization, is
 [`use-decrypt.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-decrypt.ts);
@@ -149,7 +149,7 @@ the step-by-step guide is [Decrypt a Balance](/guides/decrypt-a-balance).
 
 Used exactly once in the wrapper lifecycle: the unwrap request burns an
 encrypted amount and marks that ciphertext publicly decryptable, because
-`finalizeUnwrap` must be told — and must verify — the cleartext it releases.
+`finalizeUnwrap` must be told, and must verify, the cleartext it releases.
 
 ```ts
 const instance = await getFhevmInstance();

@@ -14,7 +14,7 @@ const fontSans = Open_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Obscura — Confidential Wrapper Registry",
+    default: "Obscura: Confidential Wrapper Registry",
     template: "%s · Obscura",
   },
   description:

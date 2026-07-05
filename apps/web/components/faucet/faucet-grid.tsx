@@ -1,7 +1,7 @@
 "use client";
 
 // Faucet grid (PRD §7.5): one-click minting per official mock. The token
-// list is public data, so it renders without a wallet — only the mint
+// list is public data, so it renders without a wallet; only the mint
 // buttons need one.
 
 import Link from "next/link";
@@ -90,7 +90,7 @@ export function FaucetGrid() {
                     <dd className="font-mono text-xs">
                       {token.balance !== undefined
                         ? `${formatTokenAmount(token.balance, token.decimals)} ${token.symbol}`
-                        : "—"}
+                        : "-"}
                     </dd>
                   </div>
                   <div className="flex items-center justify-between gap-3">

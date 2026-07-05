@@ -109,8 +109,12 @@ export function RegistryExplorer() {
                 )}
               >
                 {label}
-                <span className="ml-1.5 text-xs tabular-nums opacity-70">
-                  {isPending ? "—" : counts[key]}
+                <span className="ml-1.5 inline-flex text-xs tabular-nums opacity-70">
+                  {isPending ? (
+                    <Skeleton className="h-3 w-3" />
+                  ) : (
+                    counts[key]
+                  )}
                 </span>
               </button>
             ))}
@@ -158,7 +162,7 @@ export function RegistryExplorer() {
           </div>
           <p className="text-xs text-muted-foreground">
             Read live from the registry at every load and refreshed each
-            minute — newly registered pairs appear automatically.
+            minute, so newly registered pairs appear automatically.
           </p>
         </>
       )}

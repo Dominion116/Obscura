@@ -1,7 +1,7 @@
 "use client";
 
 // Balance tab of the pair actions drawer (PRD §7.3): the encrypted balance
-// stays hidden until the user runs a user decryption — a signed EIP-712
+// stays hidden until the user runs a user decryption: a signed EIP-712
 // request that decrypts client-side, visible only to them. The copy draws
 // the line between this and the public decryption used during unwraps,
 // because keeping the two distinct is a correctness mark of the protocol.
@@ -59,7 +59,7 @@ export function BalanceTab({ pair }: { pair: EnrichedPair }) {
               0 <span className="text-base font-normal">{pair.wrapperSymbol}</span>
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              This account has never held {pair.wrapperSymbol} — there is no
+              This account has never held {pair.wrapperSymbol}, so there is no
               ciphertext to decrypt yet.
             </p>
           </>
