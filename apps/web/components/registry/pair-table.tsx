@@ -1,3 +1,6 @@
+"use client";
+
+import { ChevronRight } from "lucide-react";
 import type { EnrichedPair } from "@obscura/shared";
 import {
   Table,
@@ -7,12 +10,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { AddressLink } from "./address-link";
 import { ValidityBadge } from "./validity-badge";
 import { formatRate, formatTokenAmount } from "@/lib/format";
 
 /** Desktop layout: one row per registered pair (PRD §7.2). */
-export function PairTable({ pairs }: { pairs: EnrichedPair[] }) {
+export function PairTable({
+  pairs,
+  onSelect,
+}: {
+  pairs: EnrichedPair[];
+  onSelect: (pair: EnrichedPair) => void;
+}) {
   return (
     <div className="rounded-xl border border-border bg-card">
       <Table>
@@ -28,11 +38,22 @@ export function PairTable({ pairs }: { pairs: EnrichedPair[] }) {
               </abbr>
             </TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>
+              <span className="sr-only">Actions</span>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {pairs.map((pair) => (
-            <TableRow key={pair.confidentialTokenAddress}>
+            <TableRow
+              key={pair.confidentialTokenAddress}
+              onClick={(e) => {
+                // Explorer links inside the row keep their own behaviour.
+                if ((e.target as HTMLElement).closest("a")) return;
+                onSelect(pair);
+              }}
+              className="cursor-pointer"
+            >
               <TableCell>
                 <div className="flex flex-col gap-1">
                   <span className="font-medium">{pair.tokenSymbol}</span>
@@ -67,6 +88,16 @@ export function PairTable({ pairs }: { pairs: EnrichedPair[] }) {
               </TableCell>
               <TableCell>
                 <ValidityBadge isValid={pair.isValid} />
+              </TableCell>
+              <TableCell className="text-right">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onSelect(pair)}
+                  aria-label={`Open actions for ${pair.tokenSymbol} → ${pair.wrapperSymbol}`}
+                >
+                  <ChevronRight className="size-4" aria-hidden />
+                </Button>
               </TableCell>
             </TableRow>
           ))}
