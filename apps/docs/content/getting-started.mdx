@@ -1,0 +1,205 @@
+---
+title: Getting Started
+description: From npm install to your first confidential wrap on Sepolia in five steps, using viem and the Zama wrappers registry.
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Getting Started
+
+This guide takes you from an empty project to your first confidential wrap on
+Sepolia. Your first wrap needs **no FHE tooling at all** — it is a plain
+ERC-20 approval followed by one contract call. The Zama Relayer SDK only
+enters the picture later, when you unwrap, decrypt, or transfer.
+
+**Prerequisites**
+
+- Node.js 20+
+- A browser wallet funded with Sepolia ETH
+- Test tokens — the Obscura app's **Faucet** page mints the official
+  cTokenMock underlying tokens to any address
+
+<Steps>
+
+## Install dependencies
+
+```sh npm2yarn
+npm i viem @zama-fhe/relayer-sdk
+```
+
+`viem` covers every read and write in this guide. `@zama-fhe/relayer-sdk` is
+only needed for the encrypted-input and decryption flows in the later guides —
+you can leave it out until then.
+
+## Set up clients and contracts
+
+```ts filename="clients.ts"
+import { createPublicClient, createWalletClient, custom, http } from "viem";
+import { sepolia } from "viem/chains";
+
+export const publicClient = createPublicClient({
+  chain: sepolia,
+  transport: http("https://ethereum-sepolia-rpc.publicnode.com"),
+});
+
+// Browser wallet. Any viem account works; this is the simplest.
+export const walletClient = createWalletClient({
+  chain: sepolia,
+  transport: custom(window.ethereum!),
+});
+```
+
+```ts filename="contracts.ts"
+import { parseAbi } from "viem";
+
+export const REGISTRY = "0x2f0750Bbb0A246059d80e94c454586a7F27a128e" as const;
+
+export const registryAbi = parseAbi([
+  "struct TokenWrapperPair { address tokenAddress; address confidentialTokenAddress; bool isValid; }",
+  "function getTokenConfidentialTokenPairsLength() view returns (uint256)",
+  "function getTokenConfidentialTokenPairsSlice(uint256 fromIndex, uint256 toIndex) view returns (TokenWrapperPair[])",
+  "function getConfidentialTokenAddress(address tokenAddress) view returns (bool, address)",
+  "function isConfidentialTokenValid(address confidentialTokenAddress) view returns (bool)",
+]);
+
+export const wrapperAbi = parseAbi([
+  "function rate() view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function underlying() view returns (address)",
+  "function confidentialBalanceOf(address account) view returns (bytes32)",
+  "function wrap(address to, uint256 amount)",
+  "event Wrap(address indexed to, uint256 roundedAmount, bytes32 encryptedWrappedAmount)",
+]);
+
+export const erc20Abi = parseAbi([
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function balanceOf(address account) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+]);
+```
+
+These are hand-trimmed to what the guide uses. The full, Sourcify-verified
+ABIs live in the repo under
+[`packages/shared/src/abis`](https://github.com/Dominion116/Obscura/tree/main/packages/shared/src/abis).
+
+## Find the wrapper for your token
+
+The remaining steps are one continuous script — later snippets use the
+variables defined in earlier ones.
+
+```ts filename="first-wrap.ts"
+import { publicClient, walletClient } from "./clients";
+import { REGISTRY, registryAbi, wrapperAbi, erc20Abi } from "./contracts";
+
+const token = "0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF"; // USDCMock
+
+const [isValid, wrapper] = await publicClient.readContract({
+  address: REGISTRY,
+  abi: registryAbi,
+  functionName: "getConfidentialTokenAddress",
+  args: [token],
+});
+
+if (!isValid) throw new Error("No valid wrapper registered for this token");
+```
+
+<Callout type="warning">
+  **Always honour `isValid`.** A revoked wrapper stays in the registry list
+  with `isValid: false`. Never wrap into one — Obscura visibly labels revoked
+  pairs and blocks the wrap action entirely.
+</Callout>
+
+## Preview the rounding
+
+Wrappers use **6 decimals** while most underlying tokens use 18, so the
+wrapper defines a conversion `rate` (for an 18-decimal token, `10^12`). The
+contract rounds your amount **down to a multiple of `rate`** and only pulls
+the rounded amount from your wallet.
+
+```ts
+import { parseUnits } from "viem";
+
+const amount = parseUnits("25.5", 18); // underlying base units
+
+const rate = await publicClient.readContract({
+  address: wrapper,
+  abi: wrapperAbi,
+  functionName: "rate",
+});
+
+const roundedAmount = amount - (amount % rate); // what will actually wrap
+const dust = amount - roundedAmount;            // stays in your wallet
+```
+
+Showing this preview before the transaction is what keeps users from being
+surprised — Obscura renders both numbers in the wrap drawer.
+
+## Approve and wrap
+
+```ts
+import { parseEventLogs } from "viem";
+
+const [account] = await walletClient.getAddresses();
+
+// 1. Approve exactly the rounded amount — that is all the wrapper pulls.
+const allowance = await publicClient.readContract({
+  address: token,
+  abi: erc20Abi,
+  functionName: "allowance",
+  args: [account, wrapper],
+});
+
+if (allowance < roundedAmount) {
+  const approveHash = await walletClient.writeContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: "approve",
+    args: [wrapper, roundedAmount],
+    account,
+  });
+  await publicClient.waitForTransactionReceipt({ hash: approveHash });
+}
+
+// 2. Wrap. You may pass the unrounded amount — the contract rounds down.
+const wrapHash = await walletClient.writeContract({
+  address: wrapper,
+  abi: wrapperAbi,
+  functionName: "wrap",
+  args: [account, amount],
+  account,
+});
+const receipt = await publicClient.waitForTransactionReceipt({ hash: wrapHash });
+
+const [wrapEvent] = parseEventLogs({
+  abi: wrapperAbi,
+  eventName: "Wrap",
+  logs: receipt.logs,
+});
+console.log("wrapped (underlying units):", wrapEvent.args.roundedAmount);
+```
+
+## Confirm your confidential balance
+
+```ts
+const handle = await publicClient.readContract({
+  address: wrapper,
+  abi: wrapperAbi,
+  functionName: "confidentialBalanceOf",
+  args: [account],
+});
+// => a bytes32 ciphertext handle, e.g. 0x93f2…
+```
+
+That `bytes32` is not your balance — it is a **handle** to an encrypted
+`euint64` that only you (and the contract) are allowed to use. Reading the
+actual number is a separate, private flow: see
+[Decrypt a Balance](/guides/decrypt-a-balance).
+
+</Steps>
+
+## Where to next
+
+- [Unwrap Tokens](/guides/unwrap) — the two-step asynchronous flow, done right
+- [Decrypt a Balance](/guides/decrypt-a-balance) — user decryption with EIP-712
+- [React Hooks](/reference/hooks) — lift Obscura's typed hooks into your app

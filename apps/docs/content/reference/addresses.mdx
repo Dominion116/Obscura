@@ -1,0 +1,103 @@
+---
+title: Contract Addresses
+description: The official Zama registry and confidential wrapper addresses on Ethereum Sepolia, rendered live from Obscura's shared package.
+---
+
+import { Callout } from "nextra/components";
+import {
+  KNOWN_WRAPPERS,
+  WRAPPERS_REGISTRY_ADDRESS,
+  SEPOLIA_CHAIN_ID,
+  explorerAddressUrl,
+} from "@obscura/shared";
+
+# Contract Addresses
+
+All contracts live on **Ethereum Sepolia** (chain id {SEPOLIA_CHAIN_ID}).
+This page is rendered from
+[`packages/shared/src/addresses/sepolia.ts`](https://github.com/Dominion116/Obscura/blob/main/packages/shared/src/addresses/sepolia.ts)
+— the same module the app and the indexer import — so it cannot drift from
+what Obscura actually uses.
+
+## Registry
+
+<table>
+  <thead>
+    <tr>
+      <th align="left">Contract</th>
+      <th align="left">Address</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ConfidentialTokenWrappersRegistry</td>
+      <td>
+        <a
+          href={explorerAddressUrl(WRAPPERS_REGISTRY_ADDRESS)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <code>{WRAPPERS_REGISTRY_ADDRESS}</code>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Known wrapper pairs
+
+<Callout>
+  **The on-chain registry is the source of truth.** This table is the
+  convenience snapshot Obscura ships for the faucet and offline reference —
+  new pairs appear in the registry (and in Obscura) without any code change.
+  Enumerate the registry itself for a complete, current list:
+  [Read the Registry](/guides/read-the-registry).
+</Callout>
+
+<div style={{ overflowX: "auto" }}>
+  <table>
+    <thead>
+      <tr>
+        <th align="left">Wrapper</th>
+        <th align="left">Confidential token (ERC-7984)</th>
+        <th align="left">Underlying (ERC-20)</th>
+        <th align="left">Mock</th>
+      </tr>
+    </thead>
+    <tbody>
+      {KNOWN_WRAPPERS.map((w) => (
+        <tr key={w.wrapper}>
+          <td>
+            <strong>{w.symbol}</strong>
+            <br />
+            <small>{w.name}</small>
+          </td>
+          <td>
+            <a href={explorerAddressUrl(w.wrapper)} target="_blank" rel="noreferrer">
+              <code>{w.wrapper}</code>
+            </a>
+          </td>
+          <td>
+            <a href={explorerAddressUrl(w.underlying)} target="_blank" rel="noreferrer">
+              <code>{w.underlying}</code>
+            </a>
+          </td>
+          <td>{w.isMock ? "Yes" : "No"}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+The mock underlying tokens are freely mintable on Sepolia — the Obscura app's
+**Faucet** page mints them to any connected wallet so you always have
+something to wrap.
+
+## Verifying for yourself
+
+Both the registry and the wrappers are UUPS proxies whose implementations are
+verified on Sourcify (exact match). The ABIs in
+[`packages/shared/src/abis`](https://github.com/Dominion116/Obscura/tree/main/packages/shared/src/abis)
+were extracted from those verified implementations, and the official list is
+maintained in the
+[Zama docs](https://docs.zama.org/protocol/protocol-apps/addresses/testnet/sepolia).

@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
-    "build": "tsc --noEmit",
+    "dev": "node init && tsx watch src/index.ts",
+    "start": "node init && tsx src/index.ts",
+    "build": "node init && tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

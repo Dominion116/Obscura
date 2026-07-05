@@ -1,0 +1,118 @@
+---
+title: Contract Surface
+description: The registry and wrapper functions, events, and errors an integrator actually uses, with exact signatures from the verified ABIs.
+---
+
+# Contract Surface
+
+The subset of the verified ABIs an integrator actually touches. Full ABIs —
+Sourcify exact-match, extracted from the deployed implementations — live in
+[`packages/shared/src/abis`](https://github.com/Dominion116/Obscura/tree/main/packages/shared/src/abis).
+
+## Registry
+
+### Read functions
+
+| Function | Returns | Use |
+| --- | --- | --- |
+| `getTokenConfidentialTokenPairsLength()` | `uint256` | Total pair count, for pagination |
+| `getTokenConfidentialTokenPairsSlice(uint256 fromIndex, uint256 toIndex)` | `TokenWrapperPair[]` | Page through pairs; `toIndex` exclusive |
+| `getTokenConfidentialTokenPair(uint256 index)` | `TokenWrapperPair` | Single pair by index |
+| `getTokenConfidentialTokenPairs()` | `TokenWrapperPair[]` | Whole list at once (fine while small) |
+| `getConfidentialTokenAddress(address token)` | `(bool isValid, address wrapper)` | Token → wrapper lookup |
+| `getTokenAddress(address wrapper)` | `(bool isValid, address token)` | Wrapper → token lookup |
+| `isConfidentialTokenValid(address wrapper)` | `bool` | Revocation check before any write |
+| `getTokenIndex(address token)` | `uint256` | Index of a registered token |
+
+```solidity
+struct TokenWrapperPair {
+    address tokenAddress;
+    address confidentialTokenAddress;
+    bool    isValid;
+}
+```
+
+### Events
+
+| Event | Emitted when |
+| --- | --- |
+| `ConfidentialTokenRegistered(address indexed tokenAddress, address indexed confidentialTokenAddress)` | A new pair is registered |
+| `ConfidentialTokenRevoked(address indexed tokenAddress, address indexed confidentialTokenAddress)` | A wrapper is revoked |
+
+### Errors worth handling
+
+| Error | Meaning |
+| --- | --- |
+| `TokenNotRegistered(address)` | Lookup for a token with no wrapper |
+| `RevokedConfidentialToken(address)` | Acting on a revoked wrapper |
+| `FromIndexGreaterOrEqualToIndex(uint256, uint256)` | Bad slice bounds |
+
+## Wrapper (ERC-7984)
+
+### Conversion and supply
+
+| Function | Returns | Use |
+| --- | --- | --- |
+| `underlying()` | `address` | The wrapped ERC-20 |
+| `rate()` | `uint256` | Underlying units per wrapper unit; drives rounding |
+| `decimals()` | `uint8` | Wrapper decimals (6) |
+| `inferredTotalSupply()` | `uint256` | Outstanding supply in underlying units — Total Value Shielded |
+| `maxTotalSupply()` | `uint256` | `uint64` cap in underlying units |
+
+### Wrap and unwrap
+
+| Function | Notes |
+| --- | --- |
+| `wrap(address to, uint256 amount)` | After ERC-20 approval; rounds `amount` down to a multiple of `rate` |
+| `unwrap(address from, address to, bytes32 encryptedAmount, bytes inputProof)` | Step 1: burns the encrypted amount, emits `UnwrapRequested`; returns the request id |
+| `unwrap(address from, address to, bytes32 amount)` | Overload taking an existing `euint64` handle instead of a fresh encrypted input |
+| `finalizeUnwrap(bytes32 unwrapRequestId, uint64 unwrapAmountCleartext, bytes decryptionProof)` | Step 2: verifies the KMS proof, releases underlying. Permissionless |
+| `unwrapRequester(bytes32 unwrapRequestId)` | Requester address; zero address ⇒ request already finalized or unknown |
+| `unwrapAmount(bytes32 unwrapRequestId)` | The burned `euint64` handle for a pending request |
+
+### Balances and transfers
+
+| Function | Notes |
+| --- | --- |
+| `confidentialBalanceOf(address account)` | Returns the `euint64` balance **handle** (bytes32) |
+| `confidentialTotalSupply()` | Encrypted total supply handle |
+| `confidentialTransfer(address to, bytes32 encryptedAmount, bytes inputProof)` | Private transfer from a fresh encrypted input; returns the transferred handle |
+| `confidentialTransfer(address to, bytes32 amount)` | Overload for an existing handle the sender may use |
+| `confidentialTransferFrom(address from, address to, …)` | Operator-driven transfer (both overloads) |
+| `confidentialTransferAndCall(…)` / `confidentialTransferFromAndCall(…)` | Transfer + receiver callback variants |
+| `setOperator(address operator, uint48 until)` | Delegate transfer rights until a timestamp |
+| `isOperator(address holder, address spender)` | Check a delegation |
+
+### Disclosure (opt-in publicity)
+
+| Function | Notes |
+| --- | --- |
+| `requestDiscloseEncryptedAmount(bytes32 encryptedAmount)` | Holder asks to make one ciphertext publicly decryptable |
+| `discloseEncryptedAmount(bytes32, uint64, bytes)` | Completes disclosure with the public-decryption proof |
+
+### Events
+
+| Event | Notes |
+| --- | --- |
+| `Wrap(address indexed to, uint256 roundedAmount, bytes32 encryptedWrappedAmount)` | Wrap amount is public |
+| `UnwrapRequested(address indexed receiver, bytes32 indexed unwrapRequestId, bytes32 amount)` | The id doubles as the burned ciphertext handle |
+| `UnwrapFinalized(address indexed receiver, bytes32 indexed unwrapRequestId, bytes32 encryptedAmount, uint64 cleartextAmount)` | Cleartext amount becomes public here |
+| `ConfidentialTransfer(address indexed from, address indexed to, bytes32 indexed amount)` | Amount stays an encrypted handle |
+| `OperatorSet(address indexed holder, address indexed operator, uint48 until)` | Delegation granted or revoked |
+
+### Errors worth handling
+
+| Error | Meaning | Typical cause |
+| --- | --- | --- |
+| `BlockedUser(address)` | Address is block-listed on the wrapper | Compliance block |
+| `SenderNotAllowedToUseHandle(bytes32, address)` | FHEVM ACL rejected the handle use | Using a ciphertext you were never allowed on |
+| `ERC7984UnauthorizedUseOfEncryptedAmount(bytes32, address)` | Same idea, ERC-7984 layer | Reusing someone else's encrypted input |
+| `ERC7984UnauthorizedSpender(address, address)` | No operator grant | `confidentialTransferFrom` without `setOperator` |
+| `ERC7984ZeroBalance(address)` | Account holds no ciphertext | Acting on a never-funded account |
+| `InvalidUnwrapRequest(bytes32)` | Unknown or finalized request id | Double-finalize; check `unwrapRequester` first |
+| `InvalidKMSSignatures()` | Decryption proof failed verification | Wrong or stale proof passed to `finalizeUnwrap` |
+| `ERC7984TotalSupplyOverflow()` | Wrap would exceed the `uint64` cap | Amount too large |
+
+Both contracts are UUPS proxies (`Upgraded` event, `upgradeToAndCall`) owned
+by Zama — pin your integration to the **proxy** addresses on the
+[addresses page](/reference/addresses), never to implementations.

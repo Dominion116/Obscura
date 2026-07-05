@@ -1,0 +1,160 @@
+---
+title: Unwrap Tokens
+description: The two-step asynchronous unwrap as an explicit state machine — request, public decryption with retry, finalize — with resumable state.
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Unwrap Tokens
+
+Unwrapping is the flow most confidential interfaces get wrong. It cannot be
+one transaction: the contract burned an **encrypted** amount and cannot
+release a public ERC-20 amount until someone proves what that amount was. So
+it runs in two on-chain steps with an off-chain public decryption between
+them.
+
+```text
+request ──▶ public decryption ──▶ finalize
+ (burn)      (relayer + KMS)      (release)
+```
+
+Model it as an explicit state machine and **persist every transition**. Any
+step can fail — wallet rejection, relayer latency, dropped tab — and the user
+must be able to resume without losing funds. Obscura persists to
+`localStorage` and resumes from whichever fields the record already has
+([`use-unwrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-unwrap.ts)):
+
+```text
+requesting → requested → decrypting → decrypted → finalizing → finalized
+     └──────────┴────────────┴─────────────┴────────────┴──▶ failed (retryable)
+```
+
+Snippets assume [Getting Started](/getting-started) plus the SDK singleton
+from the [Decryption Model](/decryption#setting-up-the-relayer-sdk).
+
+<Steps>
+
+## Request — encrypt and burn
+
+Amounts here are **wrapper base units** (6 decimals, `uint64`). Encrypt the
+amount client-side and build the input proof *before* sending any
+transaction — a failure at this stage costs nothing:
+
+```ts
+import { parseEventLogs, toHex } from "viem";
+import { getFhevmInstance } from "./fhevm";
+
+const instance = await getFhevmInstance();
+
+// The encrypted input is bound to (contract, user) — it can only be used by
+// this account against this wrapper.
+const input = instance.createEncryptedInput(wrapper, account);
+input.add64(amountWrapperUnits);
+const { handles, inputProof } = await input.encrypt();
+
+const hash = await walletClient.writeContract({
+  address: wrapper,
+  abi: wrapperAbi,
+  functionName: "unwrap",
+  args: [account, account, toHex(handles[0]), toHex(inputProof)], // (from, to, amount, proof)
+  account,
+});
+
+const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+const [event] = parseEventLogs({
+  abi: wrapperAbi,
+  eventName: "UnwrapRequested",
+  logs: receipt.logs,
+});
+const unwrapRequestId = event.args.unwrapRequestId; // persist this immediately
+```
+
+The confidential balance shrinks **now**, at the burn — not at finalization.
+
+<Callout>
+  `unwrapRequestId` is not an arbitrary id: it **is** the ciphertext handle
+  of the burned amount, which the contract marks publicly decryptable at this
+  moment. That is why step 2 can decrypt it and nothing else.
+</Callout>
+
+## Publicly decrypt the amount
+
+The relayer needs a short window after the request lands before it will
+serve the decryption — expect `not ready` at first and poll with backoff
+instead of failing the flow:
+
+```ts
+async function publicDecryptWithRetry(handle: `0x${string}`) {
+  const instance = await getFhevmInstance();
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 3000 * attempt));
+    try {
+      return await instance.publicDecrypt([handle]);
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      if (!/not.ready|not_ready|429|timeout/i.test(message)) throw error;
+    }
+  }
+  throw lastError;
+}
+
+const result = await publicDecryptWithRetry(unwrapRequestId);
+const cleartextAmount = result.clearValues[unwrapRequestId]; // bigint, wrapper units
+const decryptionProof = result.decryptionProof;
+```
+
+Persist `cleartextAmount` and `decryptionProof` — with them stored, a crashed
+session can jump straight to finalization.
+
+## Finalize — verify and release
+
+```ts
+const finalizeHash = await walletClient.writeContract({
+  address: wrapper,
+  abi: wrapperAbi,
+  functionName: "finalizeUnwrap",
+  args: [unwrapRequestId, cleartextAmount, decryptionProof],
+  account,
+});
+await publicClient.waitForTransactionReceipt({ hash: finalizeHash });
+```
+
+The contract verifies the KMS proof (`InvalidKMSSignatures` if it does not
+match) and transfers `cleartextAmount × rate` underlying base units to the
+receiver from step 1.
+
+</Steps>
+
+## Resuming safely
+
+Two checks make resume-from-anywhere robust:
+
+- **Recover the id from the receipt.** If the tab closed while the request
+  transaction was pending, `waitForTransactionReceipt` on the stored tx hash
+  and re-parse the `UnwrapRequested` event.
+- **Detect already-finalized requests.** `finalizeUnwrap` is permissionless —
+  anyone with the proof can complete it. Before retrying, read
+  `unwrapRequester(unwrapRequestId)`; the **zero address means the request no
+  longer exists on-chain**, i.e. it was already finalized. Mark it done
+  rather than resubmitting (`InvalidUnwrapRequest` otherwise).
+
+```ts
+const requester = await publicClient.readContract({
+  address: wrapper,
+  abi: wrapperAbi,
+  functionName: "unwrapRequester",
+  args: [unwrapRequestId],
+});
+const alreadyFinalized =
+  requester === "0x0000000000000000000000000000000000000000";
+```
+
+<Callout type="warning">
+  Keep the request visible until finalized. Obscura shows every pending
+  unwrap in both the transaction tracker and the portfolio, with a retry
+  action per failed step — the user can leave mid-flow and pick it up hours
+  later.
+</Callout>

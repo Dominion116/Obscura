@@ -1,14 +1,8 @@
-import type { Metadata } from "next";
-import { PageStub } from "@/components/shared/page-stub";
+import { redirect } from "next/navigation";
+import { env } from "@/config/env";
 
-export const metadata: Metadata = { title: "Developers" };
-
+// The developer reference lives on the standalone docs site (apps/docs).
+// This route survives only so old /developers links keep working.
 export default function DevelopersPage() {
-  return (
-    <PageStub
-      title="Developer reference"
-      description="How the registry and wrappers fit together, Sepolia addresses, copy-ready snippets for every action, and an install-to-first-wrap guide."
-      phase="Phase 6"
-    />
-  );
+  redirect(env.docsUrl);
 }

@@ -9,13 +9,16 @@ import { TxTracker } from "./tx-tracker";
 import { WalletButton } from "./wallet-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { env } from "@/config/env";
 
+// Developers points at the standalone docs site (apps/docs), so it renders
+// as a plain anchor; the rest are in-app routes.
 const links = [
   { href: "/registry", label: "Registry" },
   { href: "/portfolio", label: "Portfolio" },
   { href: "/faucet", label: "Faucet" },
   { href: "/activity", label: "Activity" },
-  { href: "/developers", label: "Developers" },
+  { href: env.docsUrl, label: "Developers", external: true },
 ];
 
 export function Nav() {
@@ -34,24 +37,33 @@ export function Nav() {
               obscura<span className="text-primary">.</span>
             </Link>
             <ul className="hidden items-center gap-1 md:flex">
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    aria-current={
-                      pathname?.startsWith(link.href) ? "page" : undefined
-                    }
-                    className={cn(
-                      "rounded-md px-3 py-2 text-sm transition-colors",
-                      pathname?.startsWith(link.href)
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
+              {links.map((link) => {
+                const className = cn(
+                  "rounded-md px-3 py-2 text-sm transition-colors",
+                  !link.external && pathname?.startsWith(link.href)
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                );
+                return (
+                  <li key={link.href}>
+                    {link.external ? (
+                      <a href={link.href} className={className}>
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        aria-current={
+                          pathname?.startsWith(link.href) ? "page" : undefined
+                        }
+                        className={className}
+                      >
+                        {link.label}
+                      </Link>
                     )}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
@@ -83,25 +95,38 @@ export function Nav() {
         {mobileOpen && (
           <div className="border-t border-border px-6 pb-4 md:hidden">
             <ul className="flex flex-col gap-1 pt-3">
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    aria-current={
-                      pathname?.startsWith(link.href) ? "page" : undefined
-                    }
-                    className={cn(
-                      "block rounded-md px-3 py-2 text-sm",
-                      pathname?.startsWith(link.href)
-                        ? "text-foreground"
-                        : "text-muted-foreground",
+              {links.map((link) => {
+                const className = cn(
+                  "block rounded-md px-3 py-2 text-sm",
+                  !link.external && pathname?.startsWith(link.href)
+                    ? "text-foreground"
+                    : "text-muted-foreground",
+                );
+                return (
+                  <li key={link.href}>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={className}
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        onClick={() => setMobileOpen(false)}
+                        aria-current={
+                          pathname?.startsWith(link.href) ? "page" : undefined
+                        }
+                        className={className}
+                      >
+                        {link.label}
+                      </Link>
                     )}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
             <div className="mt-3 flex items-center gap-3">
               <NetworkBadge />

@@ -1,0 +1,102 @@
+---
+title: REST API
+description: Obscura's read-only indexer API — pairs, activity feed, TVS history, stats, and health — serving only public on-chain data.
+---
+
+import { Callout } from "nextra/components";
+
+# REST API
+
+Obscura's indexer (`apps/api`, Node + Express + MongoDB) listens to registry
+and wrapper events and serves fast cached reads. It exists so lists, feeds,
+and charts don't hammer an RPC — every write still happens on-chain from the
+user's wallet, and the API is stateless with respect to user identity.
+
+<Callout>
+  **Public data only.** The indexer stores addresses, transaction hashes, and
+  the amounts that are public by nature (wrap and finalized-unwrap amounts).
+  It never sees, stores, or serves anything encrypted.
+</Callout>
+
+All routes are mounted under `/api`. Base URL is deployment-specific — the
+web app reads it from `NEXT_PUBLIC_API_URL`.
+
+## Endpoints
+
+| Method & path | Returns |
+| --- | --- |
+| `GET /api/stats` | Global totals: pair count, valid vs revoked, aggregate TVS |
+| `GET /api/pairs` | All pairs; filter with `?isValid=true\|false` and search with `?q=` |
+| `GET /api/pairs/:address` | Single pair by wrapper or token address; `404` if unknown |
+| `GET /api/activity` | Paginated activity feed |
+| `GET /api/tvs/:address` | TVS history for one pair; optional `?from=` / `?to=` (ISO dates) |
+| `GET /api/health` | Liveness plus indexer progress |
+
+## Activity feed
+
+`GET /api/activity` accepts:
+
+| Query param | Meaning |
+| --- | --- |
+| `page` | 1-based page number (default `1`) |
+| `pageSize` | Items per page, max `100` (default `20`) |
+| `type` | One of `wrap`, `unwrap_requested`, `unwrap_finalized`, `pair_registered`, `pair_revoked` |
+| `pair` | Filter by wrapper address |
+| `actor` | Filter by account address |
+
+```json filename="GET /api/activity?type=wrap&pageSize=2 (abridged)"
+{
+  "events": [
+    {
+      "type": "wrap",
+      "pairAddress": "0x7c5B…3639",
+      "actor": "0x1234…abcd",
+      "txHash": "0x…",
+      "blockNumber": 8412345,
+      "timestamp": "2026-07-04T18:21:09.000Z",
+      "publicAmount": "25500000000000000000"
+    }
+  ],
+  "page": 1,
+  "pageSize": 2,
+  "total": 137
+}
+```
+
+`publicAmount` is only present where the amount is public by nature — wraps
+and finalized unwraps. Confidential transfers appear as events without an
+amount.
+
+## Health
+
+`GET /api/health` reports the last block each indexer processed, so you can
+judge how fresh the data is:
+
+```json filename="GET /api/health"
+{
+  "ok": true,
+  "latestBlock": "8412391",
+  "indexer": {
+    "registry": 8412390,
+    "wrappers": 8412388
+  }
+}
+```
+
+## Consuming it
+
+```ts
+const API = process.env.NEXT_PUBLIC_API_URL; // e.g. https://api.your-deploy.app
+
+const stats = await fetch(`${API}/api/stats`).then((r) => r.json());
+```
+
+The web app treats the API as an accelerator, not a dependency — pair data
+always has the on-chain read path
+([Read the Registry](/guides/read-the-registry)) as its source of truth, and
+the indexer itself periodically reconciles against direct registry state so
+missed events can't corrupt coverage.
+
+Deployment and environment knobs (`MONGODB_URI`, `INDEXER_CHUNK_SIZE`,
+look-back windows, poll intervals) are documented in the repo's
+[`.env.example`](https://github.com/Dominion116/Obscura/blob/main/.env.example).

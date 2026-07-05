@@ -1,0 +1,62 @@
+---
+title: Introduction
+description: Developer reference for the Zama Confidential Token Wrappers Registry on Sepolia, built around Obscura — a production-grade reference implementation.
+---
+
+import { Cards } from "nextra/components";
+
+# Obscura Developer Docs
+
+Obscura is a production-grade reference implementation for the **Zama
+Confidential Token Wrappers Registry** on Ethereum Sepolia. The registry maps
+plain ERC-20 tokens to their official **ERC-7984 confidential wrappers** —
+tokens whose balances and transfer amounts are encrypted end-to-end with
+Zama's FHEVM protocol.
+
+These docs exist so you can point at working code instead of reinventing it.
+Every snippet here is lifted from the flows Obscura runs in production: the
+same registry reads, the same wrap sequence, the same two-step unwrap, the
+same decryption calls.
+
+## What you can build with this
+
+- **Discover wrappers** — read every registered ERC-20 ↔ ERC-7984 pair, with
+  validity status, straight from the registry contract.
+- **Wrap** — turn an ERC-20 into its confidential wrapper with an
+  approve-then-wrap sequence and correct decimal rounding.
+- **Unwrap** — run the two-step asynchronous unwrap: request, public
+  decryption, finalize.
+- **Decrypt privately** — let a holder read their own encrypted balance with
+  a signed EIP-712 user-decryption request. Nothing becomes public.
+- **Transfer confidentially** — send wrapped tokens with the amount encrypted
+  on-chain.
+
+<Cards>
+  <Cards.Card title="Getting Started — install to first wrap" href="/getting-started" />
+  <Cards.Card title="How It Works — registry & wrappers" href="/how-it-works" />
+  <Cards.Card title="Decryption Model — user vs public" href="/decryption" />
+  <Cards.Card title="Contract Addresses — Sepolia" href="/reference/addresses" />
+</Cards>
+
+## How Obscura itself is built
+
+The [repository](https://github.com/Dominion116/Obscura) is a typed Turborepo
+monorepo you can read end to end:
+
+| Workspace | What it is |
+| --- | --- |
+| `apps/web` | Next.js 15 app — registry explorer, wrap/unwrap/decrypt/transfer flows, portfolio, faucet |
+| `apps/api` | Node + Express indexer and REST API — pairs, activity feed, Total Value Shielded history |
+| `packages/shared` | Single source of truth for verified ABIs, Sepolia addresses, and TypeScript types |
+
+The contract interaction layer lives in reusable React hooks
+([documented here](/reference/hooks)) that you can lift into your own
+project largely unchanged.
+
+## Network
+
+Everything in these docs targets **Ethereum Sepolia** (chain id `11155111`)
+and the officially deployed Zama contracts. See
+[Contract Addresses](/reference/addresses) for the registry and the known
+wrapper pairs, and the [Zama Protocol docs](https://docs.zama.org/protocol)
+for the underlying FHEVM machinery.
