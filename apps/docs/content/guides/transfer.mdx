@@ -1,0 +1,103 @@
+---
+title: Confidential Transfer
+description: Send wrapped tokens with the amount encrypted on-chain — encrypted inputs, the ConfidentialTransfer event, and operator delegation.
+---
+
+import { Callout } from "nextra/components";
+
+# Confidential Transfer
+
+A confidential transfer moves wrapped tokens between accounts with the amount
+encrypted end-to-end. Observers — explorers, indexers, the recipient's
+neighbors — see *that* a transfer happened between two addresses, but never
+*how much*.
+
+Snippets assume [Getting Started](/getting-started) plus the SDK singleton
+from the [Decryption Model](/decryption#setting-up-the-relayer-sdk). Add the
+transfer entries to your wrapper ABI:
+
+```ts
+export const transferAbi = parseAbi([
+  "function confidentialTransfer(address to, bytes32 encryptedAmount, bytes inputProof) returns (bytes32)",
+  "function confidentialTransferFrom(address from, address to, bytes32 encryptedAmount, bytes inputProof) returns (bytes32)",
+  "function setOperator(address operator, uint48 until)",
+  "function isOperator(address holder, address spender) view returns (bool)",
+  "event ConfidentialTransfer(address indexed from, address indexed to, bytes32 indexed amount)",
+]);
+```
+
+## Send
+
+Exactly like the unwrap request, the amount is encrypted client-side into an
+input bound to `(wrapper, sender)`, with a proof the contract verifies:
+
+```ts
+import { toHex } from "viem";
+import { getFhevmInstance } from "./fhevm";
+
+const instance = await getFhevmInstance();
+
+const input = instance.createEncryptedInput(wrapper, account);
+input.add64(amountWrapperUnits); // 6-decimal wrapper base units
+const { handles, inputProof } = await input.encrypt();
+
+const hash = await walletClient.writeContract({
+  address: wrapper,
+  abi: transferAbi,
+  functionName: "confidentialTransfer",
+  args: [recipient, toHex(handles[0]), toHex(inputProof)],
+  account,
+});
+await publicClient.waitForTransactionReceipt({ hash });
+```
+
+The recipient needs no setup — their balance is just a new ciphertext handle
+they can [decrypt](/guides/decrypt-a-balance) whenever they choose.
+
+<Callout type="warning">
+  **Insufficient balance does not revert.** The contract cannot branch on an
+  encrypted comparison, so sending more than you hold transfers an encrypted
+  **zero** instead of failing. The function's `euint64` return handle is the
+  *actual* transferred amount. Check the sender's decrypted balance in your
+  UI before submitting, because the chain will not stop you.
+</Callout>
+
+## What the chain sees
+
+```solidity
+event ConfidentialTransfer(address indexed from, address indexed to, euint64 indexed amount);
+```
+
+`amount` is a ciphertext handle — this is why Obscura's public
+[activity feed](/reference/api) can show *wrap* amounts (public by nature)
+but only the *fact* of confidential transfers.
+
+## Delegating with operators
+
+ERC-7984's allowance analogue is the **operator**: an address authorized to
+move your wrapped tokens until an expiry timestamp.
+
+```ts
+// Grant for 24 hours
+const until = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
+await walletClient.writeContract({
+  address: wrapper,
+  abi: transferAbi,
+  functionName: "setOperator",
+  args: [operatorAddress, until],
+  account,
+});
+
+// The operator can then call:
+// confidentialTransferFrom(holder, to, encryptedAmount, inputProof)
+```
+
+Revoke by setting `until` to a past timestamp (e.g. `0`). Unlike ERC-20
+allowances, operator grants are all-or-nothing per address but expire
+automatically — prefer short windows.
+
+<Callout>
+  The wrapper's own `unwrap(from, to, …)` uses the same mechanism: a
+  contract or account unwrapping on someone's behalf must be their operator.
+  When `from === msg.sender`, no operator grant is needed.
+</Callout>

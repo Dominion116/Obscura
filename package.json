@@ -13,6 +13,14 @@
     "apps/*",
     "packages/*"
   ],
+  "overrides": {
+    "nextra": {
+      "zod": "4.1.12"
+    },
+    "nextra-theme-docs": {
+      "zod": "4.1.12"
+    }
+  },
   "devDependencies": {
     "turbo": "^2.5.0"
   },

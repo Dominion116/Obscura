@@ -1,0 +1,107 @@
+---
+title: How It Works
+description: How the Zama wrappers registry and the ERC-7984 confidential wrappers fit together — pairs, validity, rates, rounding, handles, and the token lifecycle.
+---
+
+import { Callout } from "nextra/components";
+
+# How It Works
+
+Two contracts do all the work: a single **registry** that says which wrappers
+are official, and one **wrapper** per token that holds the underlying ERC-20
+and issues its confidential twin.
+
+## The registry
+
+Without a registry, every team deploys its own test tokens and its own
+wrappers, and nothing interoperates. The
+`ConfidentialTokenWrappersRegistry` fixes that by being the one canonical
+mapping between ERC-20 tokens and their official ERC-7984 wrappers on
+Sepolia.
+
+Each entry is a `TokenWrapperPair`:
+
+```solidity
+struct TokenWrapperPair {
+    address tokenAddress;              // the plain ERC-20
+    address confidentialTokenAddress;  // its ERC-7984 wrapper
+    bool    isValid;                   // false once revoked
+}
+```
+
+Three properties matter for integrators:
+
+- **Enumerable.** `getTokenConfidentialTokenPairsLength()` plus
+  `getTokenConfidentialTokenPairsSlice(from, to)` let you page through every
+  pair ever registered, so a UI scales as the registry grows.
+- **Revocable.** Zama can revoke a wrapper
+  (`ConfidentialTokenRevoked` event). The pair stays enumerable with
+  `isValid: false` — your integration must check the flag and refuse to wrap
+  into revoked wrappers.
+- **Event-driven.** `ConfidentialTokenRegistered` and
+  `ConfidentialTokenRevoked` events mean you can auto-discover new pairs
+  without redeploying anything. Obscura's indexer and explorer both work this
+  way.
+
+See [Read the Registry](/guides/read-the-registry) for the code.
+
+## The wrapper (ERC-7984)
+
+Each wrapper is an upgradeable contract that holds the underlying ERC-20 and
+mints a confidential token against it. The confidential side follows
+**ERC-7984**: balances and amounts are `euint64` ciphertexts living in Zama's
+FHEVM coprocessor, and what you see on-chain are opaque `bytes32` **handles**
+to those ciphertexts.
+
+Key consequences:
+
+- **`confidentialBalanceOf(account)` returns a handle, not a number.**
+  Reading the actual value is a decryption, covered in the
+  [Decryption Model](/decryption).
+- **Access control lives on the handle.** Only accounts the FHEVM ACL allows
+  (the holder, the contract) may use a handle in computations or decrypt it.
+  Using someone else's handle fails with errors like
+  `SenderNotAllowedToUseHandle`.
+- **Amounts fit in `uint64`.** The wrapper uses **6 decimals**, while
+  underlying tokens commonly use 18. The conversion factor is `rate()` —
+  `10^12` for an 18-decimal token. Wrap amounts are rounded **down** to a
+  multiple of `rate`, and only the rounded amount is pulled from your wallet.
+
+```text
+underlying base units = wrapper base units × rate
+```
+
+## The token lifecycle
+
+1. **Wrap** — `wrap(to, amount)` after an ERC-20 approval. The contract
+   pulls the rounded amount and mints the same value (in wrapper units) as an
+   encrypted balance. The mint amount is public here — wrapping is the moment
+   value *enters* the confidential domain.
+   [Guide →](/guides/wrap)
+2. **Hold and transfer privately** — `confidentialTransfer` moves encrypted
+   amounts between accounts. Observers see that a transfer happened, but not
+   how much. [Guide →](/guides/transfer)
+3. **Unwrap** — a **two-step asynchronous flow**, because the contract cannot
+   release a public ERC-20 amount without first learning what the encrypted
+   amount was: request (burn), public decryption through the relayer, then
+   `finalizeUnwrap` with a KMS proof. [Guide →](/guides/unwrap)
+
+<Callout>
+  **Total Value Shielded.** `inferredTotalSupply()` reports the wrapper's
+  outstanding supply in underlying units without decrypting anything — it is
+  inferred from what the contract holds. Obscura uses it for the TVS stat on
+  every pair.
+</Callout>
+
+## Correctness rules Obscura follows
+
+These are the rules the bounty judges on, and the ones most integrations get
+wrong:
+
+| Rule | Where it bites |
+| --- | --- |
+| Check `isValid` before every wrap | Revoked wrappers still enumerate; wrapping into one strands funds behind a revoked contract |
+| Round with `rate()` and show the preview | Users wonder where their dust went |
+| Approve the rounded amount only | Approving the raw amount leaves a stale allowance |
+| Treat unwrap as resumable state, not one transaction | Any step can fail; the request must survive a page reload |
+| Keep user decryption and public decryption distinct | Publicly decrypting a balance handle would leak it forever |
