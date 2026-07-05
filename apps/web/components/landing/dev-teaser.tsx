@@ -38,14 +38,10 @@ export function DevTeaser() {
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </BlurReveal>
-        <BlurReveal delay={0.15}>
-          {/* tabIndex: scrollable region must be keyboard-reachable */}
-          <pre
-            tabIndex={0}
-            role="region"
-            aria-label="Code sample: reading registry pairs"
-            className="overflow-x-auto rounded-xl border border-border bg-card p-6 font-mono text-xs leading-relaxed text-muted-foreground"
-          >
+        <BlurReveal delay={0.15} className="min-w-0">
+          {/* pre-wrap: long lines continue on the next line instead of
+              widening the grid column past the viewport */}
+          <pre className="whitespace-pre-wrap break-words rounded-xl border border-border bg-card p-6 font-mono text-xs leading-relaxed text-muted-foreground">
             <code>{snippet}</code>
           </pre>
         </BlurReveal>
