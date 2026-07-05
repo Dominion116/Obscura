@@ -101,7 +101,7 @@ async function enrichPair(pair: TokenWrapperPair): Promise<EnrichedPair> {
  * Every registered pair, enriched for display. Refetches on an interval so
  * newly registered or revoked pairs appear without a redeploy.
  */
-export function useRegistryPairs() {
+export function useRegistryPairs(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["registry", "pairs"],
     queryFn: async (): Promise<EnrichedPair[]> => {
@@ -109,5 +109,6 @@ export function useRegistryPairs() {
       return Promise.all(pairs.map(enrichPair));
     },
     refetchInterval: 60_000,
+    enabled: options?.enabled ?? true,
   });
 }
