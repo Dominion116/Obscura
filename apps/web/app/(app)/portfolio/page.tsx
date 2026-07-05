@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { PageStub } from "@/components/shared/page-stub";
+import { PortfolioView } from "@/components/portfolio/portfolio-view";
 
-export const metadata: Metadata = { title: "Portfolio" };
+export const metadata: Metadata = {
+  title: "Portfolio",
+  description:
+    "Confidential balances across every wrapper you hold, decryptable on demand, plus pending and historical unwrap requests.",
+};
 
 export default function PortfolioPage() {
-  return (
-    <PageStub
-      title="Portfolio"
-      description="Your confidential balances across every wrapper, decryptable on demand, plus pending and historical unwrap requests."
-      phase="Phase 4"
-    />
-  );
+  return <PortfolioView />;
 }
