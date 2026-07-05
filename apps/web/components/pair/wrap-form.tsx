@@ -22,6 +22,7 @@ import { useUnderlyingBalance, useWrapFlow, type WrapStep } from "@/hooks/use-wr
 import { useWalletReady, WalletGateNotice } from "@/components/shared/wallet-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function isKnownMock(pair: EnrichedPair): boolean {
   return KNOWN_WRAPPERS.some(
@@ -125,7 +126,7 @@ export function WrapForm({ pair }: { pair: EnrichedPair }) {
   if (input && parsed === null) {
     validation = `Enter a valid amount with at most ${pair.tokenDecimals} decimal places.`;
   } else if (preview && balance !== undefined && preview.amount > balance) {
-    validation = `Insufficient balance — you have ${formatTokenAmount(balance, pair.tokenDecimals, 6)} ${pair.tokenSymbol}.`;
+    validation = `Insufficient balance: you have ${formatTokenAmount(balance, pair.tokenDecimals, 6)} ${pair.tokenSymbol}.`;
   } else if (preview && preview.wrapped === 0n) {
     validation = `Below the minimum wrap of ${formatUnits(pair.rate, pair.tokenDecimals)} ${pair.tokenSymbol}.`;
   } else if (preview && !preview.fitsUint64) {
@@ -156,17 +157,17 @@ export function WrapForm({ pair }: { pair: EnrichedPair }) {
         <label htmlFor="wrap-amount" className="font-medium">
           Amount to wrap
         </label>
-        <span className="text-muted-foreground">
+        <span className="flex items-center gap-1.5 text-muted-foreground">
           Balance:{" "}
           {balanceQuery.isPending ? (
-            "…"
+            <Skeleton className="h-3.5 w-16" />
           ) : balance !== undefined ? (
             <>
               {formatTokenAmount(balance, pair.tokenDecimals, 6)}{" "}
               {pair.tokenSymbol}
             </>
           ) : (
-            "—"
+            "-"
           )}
         </span>
       </div>
@@ -209,7 +210,7 @@ export function WrapForm({ pair }: { pair: EnrichedPair }) {
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <Droplets className="size-4 shrink-0 text-primary" aria-hidden />
           <span>
-            This is an official Zama mock token —{" "}
+            This is an official Zama mock token:{" "}
             <Link href="/faucet" className="text-primary hover:underline">
               mint free test {pair.tokenSymbol} at the faucet
             </Link>
@@ -261,7 +262,7 @@ export function WrapForm({ pair }: { pair: EnrichedPair }) {
           <p className="font-medium">The wrap did not complete</p>
           <p className="mt-1 break-words text-muted-foreground">{error}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Nothing further was submitted — you can adjust the amount and try
+            Nothing further was submitted. You can adjust the amount and try
             again. An already-confirmed approval is reused automatically.
           </p>
         </div>

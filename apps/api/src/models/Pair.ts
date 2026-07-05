@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 
 // Canonical, searchable list of registered pairs (PRD §9). Token metadata is
-// captured once at registration time — symbols/decimals/rate are immutable
+// captured once at registration time: symbols/decimals/rate are immutable
 // per the wrapper contracts, only isValid and lastTvs change after that.
 export interface PairDoc {
   tokenAddress: string;
@@ -18,7 +18,7 @@ export interface PairDoc {
   /** Total Value Shielded approximation from the last TVS snapshot, as a decimal string. */
   lastTvs: string;
   registeredAt: Date;
-  /** Block the ConfidentialTokenRegistered event landed in — the wrapper indexer's scan floor. */
+  /** Block the ConfidentialTokenRegistered event landed in: the wrapper indexer's scan floor. */
   registeredAtBlock: number;
   revokedAt: Date | null;
 }

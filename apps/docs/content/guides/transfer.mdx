@@ -1,6 +1,6 @@
 ---
 title: Confidential Transfer
-description: Send wrapped tokens with the amount encrypted on-chain — encrypted inputs, the ConfidentialTransfer event, and operator delegation.
+description: Send wrapped tokens with the amount encrypted on-chain, encrypted inputs, the ConfidentialTransfer event, and operator delegation.
 ---
 
 import { Callout } from "nextra/components";
@@ -8,8 +8,8 @@ import { Callout } from "nextra/components";
 # Confidential Transfer
 
 A confidential transfer moves wrapped tokens between accounts with the amount
-encrypted end-to-end. Observers — explorers, indexers, the recipient's
-neighbors — see *that* a transfer happened between two addresses, but never
+encrypted end-to-end. Observers (explorers, indexers, the recipient's
+neighbors) see *that* a transfer happened between two addresses, but never
 *how much*.
 
 Snippets assume [Getting Started](/getting-started) plus the SDK singleton
@@ -51,7 +51,7 @@ const hash = await walletClient.writeContract({
 await publicClient.waitForTransactionReceipt({ hash });
 ```
 
-The recipient needs no setup — their balance is just a new ciphertext handle
+The recipient needs no setup: their balance is just a new ciphertext handle
 they can [decrypt](/guides/decrypt-a-balance) whenever they choose.
 
 <Callout type="warning">
@@ -68,7 +68,7 @@ they can [decrypt](/guides/decrypt-a-balance) whenever they choose.
 event ConfidentialTransfer(address indexed from, address indexed to, euint64 indexed amount);
 ```
 
-`amount` is a ciphertext handle — this is why Obscura's public
+`amount` is a ciphertext handle, which is why Obscura's public
 [activity feed](/reference/api) can show *wrap* amounts (public by nature)
 but only the *fact* of confidential transfers.
 
@@ -94,7 +94,7 @@ await walletClient.writeContract({
 
 Revoke by setting `until` to a past timestamp (e.g. `0`). Unlike ERC-20
 allowances, operator grants are all-or-nothing per address but expire
-automatically — prefer short windows.
+automatically, so prefer short windows.
 
 <Callout>
   The wrapper's own `unwrap(from, to, …)` uses the same mechanism: a

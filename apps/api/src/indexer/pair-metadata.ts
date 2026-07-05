@@ -29,7 +29,7 @@ async function readPairMetadata(tokenAddress: Address, confidentialTokenAddress:
   };
 }
 
-/** Authoritative upsert from a ConfidentialTokenRegistered event — the exact registration block/time is known. */
+/** Authoritative upsert from a ConfidentialTokenRegistered event, where the exact registration block/time is known. */
 export async function upsertRegisteredPair(
   tokenAddress: Address,
   confidentialTokenAddress: Address,
@@ -58,7 +58,7 @@ export async function upsertRegisteredPair(
 /**
  * Best-effort upsert from a direct registry state read (PRD §14: "reconcile
  * against on-chain reads"). Used to seed/correct pair coverage independent
- * of how far back eth_getLogs can see — registeredAt/registeredAtBlock are
+ * of how far back eth_getLogs can see; registeredAt/registeredAtBlock are
  * only ever set as a fallback on first insert, never overwriting the exact
  * values a registration event already recorded.
  */

@@ -28,7 +28,7 @@ export function TxTracker() {
         : [],
     [allRequests, address],
   );
-  // Everything unfinished needs attention — including failed requests,
+  // Everything unfinished needs attention, including failed requests,
   // which still hold burned tokens until they are finalized.
   const pendingCount = requests.filter((r) => r.status !== "finalized").length;
   const finishedCount = requests.length - pendingCount;

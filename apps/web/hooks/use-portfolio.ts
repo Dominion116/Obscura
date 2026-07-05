@@ -3,7 +3,7 @@
 // Confidential holdings aggregation (PRD §7.4): sweep every registered
 // wrapper for the connected account's balance handle in one batched read, so
 // the portfolio only ever shows wrappers the account actually holds. Each
-// holding still decrypts independently through useDecryptBalance — this
+// holding still decrypts independently through useDecryptBalance; this
 // hook only answers "what do I hold", not "how much".
 
 import { useQuery } from "@tanstack/react-query";

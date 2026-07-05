@@ -89,8 +89,8 @@ export const erc20Abi = [
 ] as const;
 
 // The official cTokenMock underlyings expose an unrestricted
-// mint(address,uint256) — verified by simulating a mint from an arbitrary
-// EOA against every mock on Sepolia — so the faucet calls it directly and
+// mint(address,uint256), verified by simulating a mint from an arbitrary
+// EOA against every mock on Sepolia, so the faucet calls it directly and
 // no custom faucet contract is needed.
 export const mockErc20Abi = [
   ...erc20Abi,

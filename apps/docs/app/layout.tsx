@@ -9,7 +9,7 @@ const REPO_URL = "https://github.com/Dominion116/Obscura";
 
 export const metadata: Metadata = {
   title: {
-    default: "Obscura Docs — Confidential Wrapper Registry",
+    default: "Obscura Docs: Confidential Wrapper Registry",
     template: "%s · Obscura Docs",
   },
   description:
@@ -34,7 +34,7 @@ const navbar = (
 
 const footer = (
   <Footer>
-    Obscura — built for the Zama Developer Program, Mainnet Season 3 bounty
+    Obscura, built for the Zama Developer Program, Mainnet Season 3 bounty
     track. Sepolia testnet only.
   </Footer>
 );

@@ -8,7 +8,7 @@ import { Callout, Steps } from "nextra/components";
 # Getting Started
 
 This guide takes you from an empty project to your first confidential wrap on
-Sepolia. Your first wrap needs **no FHE tooling at all** — it is a plain
+Sepolia. Your first wrap needs **no FHE tooling at all**: it is a plain
 ERC-20 approval followed by one contract call. The Zama Relayer SDK only
 enters the picture later, when you unwrap, decrypt, or transfer.
 
@@ -16,7 +16,7 @@ enters the picture later, when you unwrap, decrypt, or transfer.
 
 - Node.js 20+
 - A browser wallet funded with Sepolia ETH
-- Test tokens — the Obscura app's **Faucet** page mints the official
+- Test tokens: the Obscura app's **Faucet** page mints the official
   cTokenMock underlying tokens to any address
 
 <Steps>
@@ -28,7 +28,7 @@ npm i viem @zama-fhe/relayer-sdk
 ```
 
 `viem` covers every read and write in this guide. `@zama-fhe/relayer-sdk` is
-only needed for the encrypted-input and decryption flows in the later guides —
+only needed for the encrypted-input and decryption flows in the later guides;
 you can leave it out until then.
 
 ## Set up clients and contracts
@@ -85,7 +85,7 @@ ABIs live in the repo under
 
 ## Find the wrapper for your token
 
-The remaining steps are one continuous script — later snippets use the
+The remaining steps are one continuous script; later snippets use the
 variables defined in earlier ones.
 
 ```ts filename="first-wrap.ts"
@@ -106,7 +106,7 @@ if (!isValid) throw new Error("No valid wrapper registered for this token");
 
 <Callout type="warning">
   **Always honour `isValid`.** A revoked wrapper stays in the registry list
-  with `isValid: false`. Never wrap into one — Obscura visibly labels revoked
+  with `isValid: false`. Never wrap into one: Obscura visibly labels revoked
   pairs and blocks the wrap action entirely.
 </Callout>
 
@@ -133,7 +133,7 @@ const dust = amount - roundedAmount;            // stays in your wallet
 ```
 
 Showing this preview before the transaction is what keeps users from being
-surprised — Obscura renders both numbers in the wrap drawer.
+surprised: Obscura renders both numbers in the wrap drawer.
 
 ## Approve and wrap
 
@@ -142,7 +142,7 @@ import { parseEventLogs } from "viem";
 
 const [account] = await walletClient.getAddresses();
 
-// 1. Approve exactly the rounded amount — that is all the wrapper pulls.
+// 1. Approve exactly the rounded amount; that is all the wrapper pulls.
 const allowance = await publicClient.readContract({
   address: token,
   abi: erc20Abi,
@@ -161,7 +161,7 @@ if (allowance < roundedAmount) {
   await publicClient.waitForTransactionReceipt({ hash: approveHash });
 }
 
-// 2. Wrap. You may pass the unrounded amount — the contract rounds down.
+// 2. Wrap. You may pass the unrounded amount; the contract rounds down.
 const wrapHash = await walletClient.writeContract({
   address: wrapper,
   abi: wrapperAbi,
@@ -188,10 +188,10 @@ const handle = await publicClient.readContract({
   functionName: "confidentialBalanceOf",
   args: [account],
 });
-// => a bytes32 ciphertext handle, e.g. 0x93f2…
+// => a bytes32 ciphertext handle, e.g. 0x93f2...
 ```
 
-That `bytes32` is not your balance — it is a **handle** to an encrypted
+That `bytes32` is not your balance; it is a **handle** to an encrypted
 `euint64` that only you (and the contract) are allowed to use. Reading the
 actual number is a separate, private flow: see
 [Decrypt a Balance](/guides/decrypt-a-balance).
@@ -200,6 +200,6 @@ actual number is a separate, private flow: see
 
 ## Where to next
 
-- [Unwrap Tokens](/guides/unwrap) — the two-step asynchronous flow, done right
-- [Decrypt a Balance](/guides/decrypt-a-balance) — user decryption with EIP-712
-- [React Hooks](/reference/hooks) — lift Obscura's typed hooks into your app
+- [Unwrap Tokens](/guides/unwrap): the two-step asynchronous flow, done right
+- [Decrypt a Balance](/guides/decrypt-a-balance): user decryption with EIP-712
+- [React Hooks](/reference/hooks): lift Obscura's typed hooks into your app

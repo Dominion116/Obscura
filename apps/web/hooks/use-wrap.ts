@@ -4,7 +4,7 @@
 // single click carries the user through both wallet prompts. The allowance
 // is checked (not assumed) at the start of every run, so a retry after a
 // failed wrap never re-prompts for an approval that is already in place.
-// Approval covers the rounded amount only — that is all the wrapper pulls.
+// Approval covers the rounded amount only, since that is all the wrapper pulls.
 
 import { useCallback, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";

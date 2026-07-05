@@ -12,11 +12,11 @@ Built for the **Zama Developer Program, Mainnet Season 3, Bounty Track**.
 
 Many developers spin up their own ERC-20 test tokens and their own ERC-7984 wrappers rather than using the ones already published in the official Zama Wrappers Registry. Every team that does this creates a parallel set of tokens nobody else recognises, fragmenting the ecosystem and making it harder for confidential applications to interoperate.
 
-The registry already exists to solve this — but there was no polished product that made it easy to browse, trust, and use. Obscura closes three practical gaps in one application:
+The registry already exists to solve this, but there was no polished product that made it easy to browse, trust, and use. Obscura closes three practical gaps in one application:
 
-- **Discovery** — a friendly surface that lists every registered pair and clearly separates valid wrappers from revoked ones.
-- **Usability** — wrapping is simple, but unwrapping is a two-step asynchronous flow that most interfaces handle poorly, and reading an encrypted balance requires a signed decryption step unfamiliar to newcomers. Obscura guides both.
-- **Adoption** — a working, readable reference that shows developers exactly how to talk to the registry and the wrappers, so they reuse the pieces instead of reinventing them.
+- **Discovery**: a friendly surface that lists every registered pair and clearly separates valid wrappers from revoked ones.
+- **Usability**: wrapping is simple, but unwrapping is a two-step asynchronous flow that most interfaces handle poorly, and reading an encrypted balance requires a signed decryption step unfamiliar to newcomers. Obscura guides both.
+- **Adoption**: a working, readable reference that shows developers exactly how to talk to the registry and the wrappers, so they reuse the pieces instead of reinventing them.
 
 ## Features
 
@@ -25,7 +25,7 @@ The registry already exists to solve this — but there was no polished product 
 | **Registry explorer** | Every registered pair with underlying token, confidential wrapper, conversion rate, wrapper decimals, Total Value Shielded, and a clear valid/revoked badge. Search by symbol or address, filter by validity. Revoked pairs are visibly labelled and blocked from wrapping. |
 | **Wrap** | Approve-then-wrap flow with a live preview of the rounded amount that will actually wrap and the excess that will be refunded (wrappers cap at six decimals and round down). |
 | **Unwrap** | The two-step asynchronous flow implemented as an explicit state machine: request → public decryption → finalize. Every failure mode has an explicit state and a retry path. |
-| **Balance decryption** | Encrypted balances stay hidden by default. One click signs a typed-data request and decrypts the balance client-side — visible only to the holder. |
+| **Balance decryption** | Encrypted balances stay hidden by default. One click signs a typed-data request and decrypts the balance client-side, visible only to the holder. |
 | **Confidential transfer** | Send wrapped tokens with the amount encrypted, demonstrating the full ERC-7984 surface. |
 | **Portfolio** | Aggregated confidential holdings across every wrapper, decryptable on demand, plus pending and historical unwrap requests. |
 | **Faucet** | One-click minting of the official cTokenMocks on Sepolia. |
@@ -36,8 +36,8 @@ The registry already exists to solve this — but there was no polished product 
 
 Obscura uses both decryption paths the Zama protocol provides, and keeps them deliberately distinct:
 
-- **User decryption** — a signed typed-data request lets a holder read their own encrypted balance privately, client-side. Nothing is revealed on chain.
-- **Public decryption** — used *only* where the protocol requires a value to become public: the unwrap amount during finalization.
+- **User decryption**: a signed typed-data request lets a holder read their own encrypted balance privately, client-side. Nothing is revealed on chain.
+- **Public decryption**: used *only* where the protocol requires a value to become public: the unwrap amount during finalization.
 
 No private data ever touches a server. The indexer stores only public, on-chain-derived events.
 
@@ -59,9 +59,9 @@ No private data ever touches a server. The indexer stores only public, on-chain-
 └────────────────┘                     └──────────────────────┘
 ```
 
-- **Web app** — renders every page, talks to the chain through wagmi and viem, and runs all confidential operations client-side through the Zama Relayer SDK.
-- **Indexer and API** — a Node service that listens to registry and wrapper events, stores pairs, activity, and TVS snapshots in MongoDB, and serves cached reads. It never touches private data.
-- **Shared package** — a single source of truth for ABIs, Sepolia addresses, and TypeScript types, imported by both sides to prevent drift.
+- **Web app**: renders every page, talks to the chain through wagmi and viem, and runs all confidential operations client-side through the Zama Relayer SDK.
+- **Indexer and API**: a Node service that listens to registry and wrapper events, stores pairs, activity, and TVS snapshots in MongoDB, and serves cached reads. It never touches private data.
+- **Shared package**: a single source of truth for ABIs, Sepolia addresses, and TypeScript types, imported by both sides to prevent drift.
 
 ## Tech stack
 
@@ -105,7 +105,7 @@ npm install
 
 # configure the web app
 cp .env.example apps/web/.env.local
-# then set NEXT_PUBLIC_REOWN_PROJECT_ID — create a free project at https://cloud.reown.com
+# then set NEXT_PUBLIC_REOWN_PROJECT_ID, create a free project at https://cloud.reown.com
 
 # run everything
 npm run dev
@@ -138,7 +138,7 @@ The web app runs at `http://localhost:3000`.
 | --- | --- |
 | Confidential Token Wrappers Registry | [`0x2f0750Bbb0A246059d80e94c454586a7F27a128e`](https://sepolia.etherscan.io/address/0x2f0750Bbb0A246059d80e94c454586a7F27a128e) |
 
-The full list of official wrapper pairs (cUSDCMock, cUSDTMock, cWETHMock, cBRONMock, cZAMAMock, ctGBPMock, cXAUtMock, ctGBP) lives in [`packages/shared/src/addresses/sepolia.ts`](packages/shared/src/addresses/sepolia.ts). The app always treats the on-chain registry as the source of truth — the static list is a convenience snapshot for the faucet.
+The full list of official wrapper pairs (cUSDCMock, cUSDTMock, cWETHMock, cBRONMock, cZAMAMock, ctGBPMock, cXAUtMock, ctGBP) lives in [`packages/shared/src/addresses/sepolia.ts`](packages/shared/src/addresses/sepolia.ts). The app always treats the on-chain registry as the source of truth; the static list is a convenience snapshot for the faucet.
 
 ABIs in the shared package were pulled from **Sourcify exact-match verifications** of the deployed implementation contracts, not transcribed by hand.
 

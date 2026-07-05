@@ -99,7 +99,7 @@ export interface GlobalStats {
 
 /**
  * A registered pair as served by the read API (apps/api). Same fields as
- * EnrichedPair, but `rate`/`tvs` are decimal strings — JSON has no bigint —
+ * EnrichedPair, but `rate`/`tvs` are decimal strings (JSON has no bigint),
  * plus the registration metadata the indexer captures that a live on-chain
  * read doesn't carry.
  */

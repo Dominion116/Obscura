@@ -1,6 +1,6 @@
 ---
 title: Wrap Tokens
-description: Approve-then-wrap with correct decimal rounding — the amount preview, the exact allowance, and the Wrap event.
+description: Approve-then-wrap with correct decimal rounding, the amount preview, the exact allowance, and the Wrap event.
 ---
 
 import { Callout, Steps } from "nextra/components";
@@ -8,7 +8,7 @@ import { Callout, Steps } from "nextra/components";
 # Wrap Tokens
 
 Wrapping turns an ERC-20 into its confidential twin. It is the simplest flow
-on the wrapper — two transactions, no FHE tooling — but the decimal rounding
+on the wrapper (two transactions, no FHE tooling), but the decimal rounding
 is where interfaces quietly go wrong. Snippets assume the setup from
 [Getting Started](/getting-started).
 
@@ -39,7 +39,7 @@ const remainder = amount - roundedAmount;       // stays in the wallet
 <Callout type="warning">
   **Approve `roundedAmount`, not `amount`.** The wrapper only ever pulls the
   rounded value. Approving the raw amount works, but leaves a stale residual
-  allowance on the token — poor hygiene, and some tokens (USDT-style) revert
+  allowance on the token: poor hygiene, and some tokens (USDT-style) revert
   on non-zero → non-zero approvals.
 </Callout>
 
@@ -49,7 +49,7 @@ const remainder = amount - roundedAmount;       // stays in the wallet
 
 ### Check validity
 
-Re-check the pair right before writing — revocation can happen at any time:
+Re-check the pair right before writing; revocation can happen at any time:
 
 ```ts
 const isValid = await publicClient.readContract({
@@ -94,7 +94,7 @@ const hash = await walletClient.writeContract({
   address: wrapper,
   abi: wrapperAbi,
   functionName: "wrap",
-  args: [account, amount], // unrounded is fine — the contract rounds down
+  args: [account, amount], // unrounded is fine; the contract rounds down
   account,
 });
 const receipt = await publicClient.waitForTransactionReceipt({ hash });
@@ -129,8 +129,8 @@ const [wrapEvent] = parseEventLogs({
 | ERC-20 `transferFrom` failure / `SafeERC20FailedOperation` | Allowance or balance too low | Re-check allowance and balance, retry |
 | `ERC7984TotalSupplyOverflow` | Wrap would exceed the `uint64` supply cap | Reduce the amount |
 
-The production implementation — one call that sequences allowance check,
-approval, wrap, and cache invalidation with per-step status — is
+The production implementation, one call that sequences allowance check,
+approval, wrap, and cache invalidation with per-step status, is
 [`use-wrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-wrap.ts).
 
 ## After the wrap

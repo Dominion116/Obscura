@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Menu, X, ChevronRight, EyeOff } from 'lucide-react'
 import { useScroll, motion } from 'motion/react'
+import { env } from '@/config/env'
 
 export function HeroSection() {
     return (
@@ -14,7 +15,7 @@ export function HeroSection() {
                 landmark so the sections after the hero are inside it too */}
             <div className="overflow-x-hidden">
                 {/* relative so the inset-1 backdrop frame wraps the hero content
-                    instead of the viewport — keeps the buttons inside the frame */}
+                    instead of the viewport, keeping the buttons inside the frame */}
                 <section className="relative min-h-screen">
                     <div className="py-24 md:pb-32 lg:pb-36 lg:pt-72">
                         <div className="relative z-10 mx-auto flex max-w-7xl flex-col px-6 lg:block lg:px-12">
@@ -34,7 +35,7 @@ export function HeroSection() {
                                     </Button>
                                     {/* rely on the ghost variant's own hover:bg-accent
                                         instead of the template's hardcoded
-                                        zinc-950/white tint — those two hover
+                                        zinc-950/white tint: those two hover
                                         backgrounds conflict at the same
                                         specificity in dark mode and the wrong
                                         one can win, making hover look dead */}
@@ -44,9 +45,9 @@ export function HeroSection() {
                                         size="lg"
                                         variant="ghost"
                                         className="h-12 rounded-full px-5 text-base">
-                                        <Link href="/developers">
+                                        <a href={env.docsUrl}>
                                             <span className="text-nowrap">Build with it</span>
-                                        </Link>
+                                        </a>
                                     </Button>
                                 </div>
                             </div>
@@ -79,7 +80,6 @@ const menuItems = [
     { name: 'Portfolio', href: '/portfolio' },
     { name: 'Faucet', href: '/faucet' },
     { name: 'Activity', href: '/activity' },
-    { name: 'Developers', href: '/developers' },
 ]
 
 const HeroHeader = () => {
@@ -140,7 +140,7 @@ const HeroHeader = () => {
                                 <ul className="space-y-6 text-base">
                                     {menuItems.map((item, index) => (
                                         <li key={index}>
-                                            {/* close the mobile menu on navigation —
+                                            {/* close the mobile menu on navigation:
                                                 client-side routing otherwise leaves
                                                 the panel open over the new page */}
                                             <Link
@@ -158,9 +158,9 @@ const HeroHeader = () => {
                                     asChild
                                     variant="outline"
                                     size="sm">
-                                    <Link href="/developers">
+                                    <a href={env.docsUrl}>
                                         <span>Docs</span>
-                                    </Link>
+                                    </a>
                                 </Button>
                                 <Button
                                     asChild

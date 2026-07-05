@@ -20,7 +20,7 @@ const ICONS: Record<ActivityEvent["type"], ComponentType<{ className?: string }>
 
 /**
  * Wrap's publicAmount is underlying (token) base units; unwrap_finalized's is
- * wrapper base units, converted to underlying via the pair's rate — mirrors
+ * wrapper base units, converted to underlying via the pair's rate. Mirrors
  * the same math the wrap form and unwrap tracker already use.
  */
 function describe(event: ActivityEvent, pair: EnrichedPair | undefined) {

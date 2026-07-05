@@ -9,7 +9,7 @@ const SLICE_SIZE = 50n;
 
 /**
  * Reads every pair directly from the registry's current state (PRD §14:
- * "reconcile against on-chain reads") — the same slice functions the web
+ * "reconcile against on-chain reads"), using the same slice functions the web
  * app's explorer uses. This makes pair coverage correct regardless of how
  * far back eth_getLogs can see: a free-tier RPC's block-range limit can
  * starve the event-driven registry indexer, but it can't hide a pair that

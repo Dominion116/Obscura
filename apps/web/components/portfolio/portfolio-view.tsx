@@ -1,7 +1,7 @@
 "use client";
 
 // Portfolio (PRD §7.4): the account's confidential holdings, decryptable on
-// demand, plus every unwrap request tied to this wallet — the permanent home
+// demand, plus every unwrap request tied to this wallet: the permanent home
 // that turns the two-step asynchronous flow (PRD §7.3) into something that
 // survives a closed tab.
 
@@ -121,7 +121,7 @@ export function PortfolioView() {
         {requests.length === 0 ? (
           <p className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
             No unwrap requests yet. Start one from a pair&apos;s Unwrap tab in
-            the registry — it will appear here with its live state until it
+            the registry; it will appear here with its live state until it
             finalizes.
           </p>
         ) : (

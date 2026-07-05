@@ -3,7 +3,7 @@ import { sepolia } from "viem/chains";
 import { env } from "../config/env";
 
 // Batches concurrent reads into multicall, same trick the web app's client
-// uses — a full pair metadata sweep folds into a handful of RPC round trips.
+// uses: a full pair metadata sweep folds into a handful of RPC round trips.
 export const publicClient = createPublicClient({
   chain: sepolia,
   transport: http(env.sepoliaRpcUrl),

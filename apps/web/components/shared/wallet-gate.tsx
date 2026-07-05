@@ -33,7 +33,7 @@ export function WalletGateNotice() {
         <div>
           <p className="font-medium">Connect a wallet to continue</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Transactions are signed locally by your wallet — Obscura never
+            Transactions are signed locally by your wallet. Obscura never
             holds keys or funds.
           </p>
         </div>

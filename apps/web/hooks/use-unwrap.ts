@@ -2,18 +2,18 @@
 
 // Two-step asynchronous unwrap (PRD §7.3), run as an explicit state machine:
 //
-//   request  — encrypt the amount client-side (Relayer SDK input proof) and
-//              call unwrap(), which burns the encrypted amount and emits
-//              UnwrapRequested. The request id IS the burned-amount
-//              ciphertext handle, which the contract makes publicly
-//              decryptable at this point.
-//   decrypt  — publicly decrypt the handle through the relayer to obtain
-//              the cleartext amount and its KMS decryption proof.
-//   finalize — call finalizeUnwrap(id, cleartext, proof), which verifies
-//              the proof on-chain and releases the underlying tokens.
+//   request:  encrypt the amount client-side (Relayer SDK input proof) and
+//             call unwrap(), which burns the encrypted amount and emits
+//             UnwrapRequested. The request id IS the burned-amount
+//             ciphertext handle, which the contract makes publicly
+//             decryptable at this point.
+//   decrypt:  publicly decrypt the handle through the relayer to obtain
+//             the cleartext amount and its KMS decryption proof.
+//   finalize: call finalizeUnwrap(id, cleartext, proof), which verifies
+//             the proof on-chain and releases the underlying tokens.
 //
 // Every state is persisted (lib/unwrap-store), so any step can fail and be
-// resumed later — from the drawer or the transaction tracker — without
+// resumed later, from the drawer or the transaction tracker, without
 // losing funds or re-running earlier steps. resumeUnwrap derives the next
 // action from which fields the record already carries.
 
@@ -114,7 +114,7 @@ export function useUnwrapActions() {
       }
       const id = current.unwrapRequestId!;
 
-      // A zero requester means the request no longer exists on-chain — it
+      // A zero requester means the request no longer exists on-chain: it
       // was already finalized (possibly by someone else; finalize is
       // permissionless), so just record the completion.
       const requester = await publicClient.readContract({
@@ -158,7 +158,7 @@ export function useUnwrapActions() {
       })!;
       invalidateBalances();
       toast.success(
-        `Unwrap complete — ${formatTokenAmount(
+        `Unwrap complete: ${formatTokenAmount(
           BigInt(current.cleartextAmount ?? "0") * BigInt(current.rate),
           current.tokenDecimals,
           6,

@@ -46,7 +46,7 @@ export function UnwrapRequestItem({
 }) {
   const finished = record.status === "finalized";
   const failed = record.status === "failed";
-  // Anything unfinished and not currently running can be picked back up —
+  // Anything unfinished and not currently running can be picked back up,
   // including states like "decrypting" left behind by a closed tab.
   const actionable = !finished && !busy;
 

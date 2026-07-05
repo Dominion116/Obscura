@@ -7,7 +7,7 @@ import { env } from "@/config/env";
 // so warn loudly instead of throwing during build.
 if (!env.reownProjectId && typeof window !== "undefined") {
   console.warn(
-    "NEXT_PUBLIC_REOWN_PROJECT_ID is not set — wallet connection is disabled. " +
+    "NEXT_PUBLIC_REOWN_PROJECT_ID is not set, so wallet connection is disabled. " +
       "Create a project at https://cloud.reown.com and add it to .env.local",
   );
 }

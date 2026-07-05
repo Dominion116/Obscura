@@ -1,6 +1,6 @@
 ---
 title: How It Works
-description: How the Zama wrappers registry and the ERC-7984 confidential wrappers fit together — pairs, validity, rates, rounding, handles, and the token lifecycle.
+description: How the Zama wrappers registry and the ERC-7984 confidential wrappers fit together, pairs, validity, rates, rounding, handles, and the token lifecycle.
 ---
 
 import { Callout } from "nextra/components";
@@ -36,7 +36,7 @@ Three properties matter for integrators:
   pair ever registered, so a UI scales as the registry grows.
 - **Revocable.** Zama can revoke a wrapper
   (`ConfidentialTokenRevoked` event). The pair stays enumerable with
-  `isValid: false` — your integration must check the flag and refuse to wrap
+  `isValid: false`; your integration must check the flag and refuse to wrap
   into revoked wrappers.
 - **Event-driven.** `ConfidentialTokenRegistered` and
   `ConfidentialTokenRevoked` events mean you can auto-discover new pairs
@@ -63,7 +63,7 @@ Key consequences:
   Using someone else's handle fails with errors like
   `SenderNotAllowedToUseHandle`.
 - **Amounts fit in `uint64`.** The wrapper uses **6 decimals**, while
-  underlying tokens commonly use 18. The conversion factor is `rate()` —
+  underlying tokens commonly use 18. The conversion factor is `rate()`:
   `10^12` for an 18-decimal token. Wrap amounts are rounded **down** to a
   multiple of `rate`, and only the rounded amount is pulled from your wallet.
 
@@ -73,22 +73,22 @@ underlying base units = wrapper base units × rate
 
 ## The token lifecycle
 
-1. **Wrap** — `wrap(to, amount)` after an ERC-20 approval. The contract
+1. **Wrap**: `wrap(to, amount)` after an ERC-20 approval. The contract
    pulls the rounded amount and mints the same value (in wrapper units) as an
-   encrypted balance. The mint amount is public here — wrapping is the moment
+   encrypted balance. The mint amount is public here; wrapping is the moment
    value *enters* the confidential domain.
    [Guide →](/guides/wrap)
-2. **Hold and transfer privately** — `confidentialTransfer` moves encrypted
+2. **Hold and transfer privately**: `confidentialTransfer` moves encrypted
    amounts between accounts. Observers see that a transfer happened, but not
    how much. [Guide →](/guides/transfer)
-3. **Unwrap** — a **two-step asynchronous flow**, because the contract cannot
+3. **Unwrap**: a **two-step asynchronous flow**, because the contract cannot
    release a public ERC-20 amount without first learning what the encrypted
    amount was: request (burn), public decryption through the relayer, then
    `finalizeUnwrap` with a KMS proof. [Guide →](/guides/unwrap)
 
 <Callout>
   **Total Value Shielded.** `inferredTotalSupply()` reports the wrapper's
-  outstanding supply in underlying units without decrypting anything — it is
+  outstanding supply in underlying units without decrypting anything. It is
   inferred from what the contract holds. Obscura uses it for the TVS stat on
   every pair.
 </Callout>

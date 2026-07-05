@@ -1,7 +1,7 @@
 "use client";
 
 // Global stats for the landing page's live stats band (PRD §6.2, §7.7).
-// Primary path reads the indexer's cached aggregate through the API — fast,
+// Primary path reads the indexer's cached aggregate through the API, fast,
 // and scales with the registry regardless of size. The on-chain fallback
 // (the same aggregation used before the API existed) only activates once
 // the API path has actually failed or isn't configured, so the common case

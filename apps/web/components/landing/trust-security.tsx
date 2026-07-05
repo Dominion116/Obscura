@@ -11,7 +11,7 @@ const items = [
   {
     icon: Globe,
     title: "Public decryption",
-    body: "Used only where the protocol requires a value to become public — the unwrap amount during finalization. Nothing else is ever revealed.",
+    body: "Used only where the protocol requires a value to become public: the unwrap amount during finalization. Nothing else is ever revealed.",
   },
   {
     icon: ShieldAlert,

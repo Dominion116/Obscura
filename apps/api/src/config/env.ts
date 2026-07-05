@@ -22,13 +22,13 @@ export const env = {
   tvsIntervalMs: Number(process.env.TVS_INTERVAL_MS ?? 5 * 60_000),
   /**
    * Max block range per eth_getLogs call. Free-tier RPCs are often capped
-   * hard (e.g. Alchemy's free plan allows only 10 blocks per call) — raise
+   * hard (e.g. Alchemy's free plan allows only 10 blocks per call). Raise
    * this if your provider allows a wider range.
    */
   logChunkSize: BigInt(process.env.INDEXER_CHUNK_SIZE ?? 10),
   /**
    * First block to scan on a cold start (no IndexerState yet). This only
-   * bounds how far back the *activity feed* sees — current pair coverage
+   * bounds how far back the *activity feed* sees; current pair coverage
    * comes from reconcilePairs(), a direct registry state read that doesn't
    * depend on log history at all. Override with the registry's actual
    * deployment block for full activity history on an archive-capable RPC.

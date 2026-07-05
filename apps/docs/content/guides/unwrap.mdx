@@ -1,6 +1,6 @@
 ---
 title: Unwrap Tokens
-description: The two-step asynchronous unwrap as an explicit state machine — request, public decryption with retry, finalize — with resumable state.
+description: The two-step asynchronous unwrap as an explicit state machine, request, public decryption with retry, finalize, with resumable state.
 ---
 
 import { Callout, Steps } from "nextra/components";
@@ -19,7 +19,7 @@ request ──▶ public decryption ──▶ finalize
 ```
 
 Model it as an explicit state machine and **persist every transition**. Any
-step can fail — wallet rejection, relayer latency, dropped tab — and the user
+step can fail (wallet rejection, relayer latency, dropped tab), and the user
 must be able to resume without losing funds. Obscura persists to
 `localStorage` and resumes from whichever fields the record already has
 ([`use-unwrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-unwrap.ts)):
@@ -34,11 +34,11 @@ from the [Decryption Model](/decryption#setting-up-the-relayer-sdk).
 
 <Steps>
 
-## Request — encrypt and burn
+## Request: encrypt and burn
 
 Amounts here are **wrapper base units** (6 decimals, `uint64`). Encrypt the
 amount client-side and build the input proof *before* sending any
-transaction — a failure at this stage costs nothing:
+transaction; a failure at this stage costs nothing:
 
 ```ts
 import { parseEventLogs, toHex } from "viem";
@@ -46,7 +46,7 @@ import { getFhevmInstance } from "./fhevm";
 
 const instance = await getFhevmInstance();
 
-// The encrypted input is bound to (contract, user) — it can only be used by
+// The encrypted input is bound to (contract, user); it can only be used by
 // this account against this wrapper.
 const input = instance.createEncryptedInput(wrapper, account);
 input.add64(amountWrapperUnits);
@@ -70,7 +70,7 @@ const [event] = parseEventLogs({
 const unwrapRequestId = event.args.unwrapRequestId; // persist this immediately
 ```
 
-The confidential balance shrinks **now**, at the burn — not at finalization.
+The confidential balance shrinks **now**, at the burn, not at finalization.
 
 <Callout>
   `unwrapRequestId` is not an arbitrary id: it **is** the ciphertext handle
@@ -81,7 +81,7 @@ The confidential balance shrinks **now**, at the burn — not at finalization.
 ## Publicly decrypt the amount
 
 The relayer needs a short window after the request lands before it will
-serve the decryption — expect `not ready` at first and poll with backoff
+serve the decryption. Expect `not ready` at first and poll with backoff
 instead of failing the flow:
 
 ```ts
@@ -106,10 +106,10 @@ const cleartextAmount = result.clearValues[unwrapRequestId]; // bigint, wrapper 
 const decryptionProof = result.decryptionProof;
 ```
 
-Persist `cleartextAmount` and `decryptionProof` — with them stored, a crashed
+Persist `cleartextAmount` and `decryptionProof`; with them stored, a crashed
 session can jump straight to finalization.
 
-## Finalize — verify and release
+## Finalize: verify and release
 
 ```ts
 const finalizeHash = await walletClient.writeContract({
@@ -135,7 +135,7 @@ Two checks make resume-from-anywhere robust:
 - **Recover the id from the receipt.** If the tab closed while the request
   transaction was pending, `waitForTransactionReceipt` on the stored tx hash
   and re-parse the `UnwrapRequested` event.
-- **Detect already-finalized requests.** `finalizeUnwrap` is permissionless —
+- **Detect already-finalized requests.** `finalizeUnwrap` is permissionless:
   anyone with the proof can complete it. Before retrying, read
   `unwrapRequester(unwrapRequestId)`; the **zero address means the request no
   longer exists on-chain**, i.e. it was already finalized. Mark it done
@@ -155,6 +155,6 @@ const alreadyFinalized =
 <Callout type="warning">
   Keep the request visible until finalized. Obscura shows every pending
   unwrap in both the transaction tracker and the portfolio, with a retry
-  action per failed step — the user can leave mid-flow and pick it up hours
+  action per failed step. The user can leave mid-flow and pick it up hours
   later.
 </Callout>

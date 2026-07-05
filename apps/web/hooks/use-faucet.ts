@@ -1,8 +1,8 @@
 "use client";
 
 // Faucet (PRD §7.5). The official cTokenMock underlyings all expose an
-// unrestricted mint(address,uint256) — verified by simulating a mint from an
-// arbitrary EOA against every mock on Sepolia — so the faucet mints directly
+// unrestricted mint(address,uint256), verified by simulating a mint from an
+// arbitrary EOA against every mock on Sepolia, so the faucet mints directly
 // from the user's wallet and no custom faucet contract is needed.
 
 import { useCallback, useState } from "react";

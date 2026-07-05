@@ -20,6 +20,14 @@ const CONTRACT_ERRORS: Record<string, string> = {
     "The underlying token transfer failed. Check your balance and allowance.",
   SafeCastOverflowedUintDowncast:
     "The amount is too large for the wrapper. Try a smaller amount.",
+  InvalidKMSSignatures:
+    "The decryption proof for this unwrap was rejected on-chain. Wait a moment and retry.",
+  InvalidUnwrapRequest:
+    "This unwrap request no longer exists, it was likely already finalized. Refresh to see its final state.",
+  SenderNotAllowedToUseHandle:
+    "You are not permitted to use this encrypted value. Refresh and try again.",
+  ERC7984UnauthorizedUseOfEncryptedAmount:
+    "This encrypted input can no longer be used. Refresh and try again.",
 };
 
 /** Turn a wagmi/viem write error into a message a person can act on. */

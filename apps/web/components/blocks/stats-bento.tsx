@@ -3,21 +3,20 @@ import React, { useRef } from 'react'
 import { useGlobalStats } from '@/hooks/use-stats'
 import { TimelineAnimation } from '@/components/ui/timeline-animation'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ShieldCheck } from 'lucide-react'
 
 export const StatsBento = () => {
   const sectionRef = useRef<HTMLElement>(null)
 
   // Reads through the indexer's cached aggregate (PRD §7.7), falling back to
-  // a direct on-chain read if the API is unreachable — see useGlobalStats.
+  // a direct on-chain read if the API is unreachable, see useGlobalStats.
   const { data: stats, isPending } = useGlobalStats()
 
   const total = stats?.totalPairs
   const valid = stats?.validPairs
   const revoked = stats?.revokedPairs
-
-  const fmt = (n: number | undefined) =>
-    isPending || n === undefined ? '—' : String(n)
+  const loading = isPending || stats === undefined
 
   // One viewport-height section holding the problem statement and the stats
   // grid, vertically centered. min-h (not a hard h) renders exactly 100vh
@@ -38,7 +37,7 @@ export const StatsBento = () => {
         </h2>
         <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
           Zama&apos;s Confidential Token Wrappers Registry already maps each
-          ERC-20 to its official ERC-7984 wrapper — one canonical, revocable
+          ERC-20 to its official ERC-7984 wrapper: one canonical, revocable
           source of truth. Obscura makes it the obvious place to point to:
           browsable, trustworthy, and usable by anyone.
         </p>
@@ -60,7 +59,7 @@ export const StatsBento = () => {
           </div>
           <p className="text-muted-foreground text-sm max-w-xs">
             Every wrapped balance lives on-chain as ERC-7984 ciphertext.
-            Amounts stay encrypted end to end — only the holder can decrypt
+            Amounts stay encrypted end to end, so only the holder can decrypt
             what they own.
           </p>
         </TimelineAnimation>
@@ -74,7 +73,11 @@ export const StatsBento = () => {
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
               Registered pairs
             </p>
-            <p className="text-3xl text-foreground">{fmt(total)}</p>
+            {loading ? (
+              <Skeleton className="h-9 w-16" />
+            ) : (
+              <p className="text-3xl text-foreground">{total}</p>
+            )}
           </div>
           <div className="flex gap-1 items-end h-8">
             {[10, 20, 40, 30, 60, 50, 80, 70, 90, 100, 110].map((h, i) => (
@@ -92,7 +95,11 @@ export const StatsBento = () => {
           animationNum={3}
           timelineRef={sectionRef}
           className="md:col-span-1 bg-card rounded-3xl p-6 border border-border flex flex-col justify-center text-center">
-          <p className="text-2xl text-foreground">{fmt(valid)}</p>
+          {loading ? (
+            <Skeleton className="mx-auto h-7 w-10" />
+          ) : (
+            <p className="text-2xl text-foreground">{valid}</p>
+          )}
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             Valid wrappers
           </p>
@@ -107,9 +114,13 @@ export const StatsBento = () => {
             <ShieldCheck className="size-5" aria-hidden />
           </div>
           <div>
-            <p className="text-sm text-foreground leading-none">
-              {fmt(revoked)} revoked
-            </p>
+            {loading ? (
+              <Skeleton className="h-4 w-20" />
+            ) : (
+              <p className="text-sm text-foreground leading-none">
+                {revoked} revoked
+              </p>
+            )}
             <p className="text-xs font-semibold text-muted-foreground mt-1">
               Read live from the registry on Sepolia
             </p>

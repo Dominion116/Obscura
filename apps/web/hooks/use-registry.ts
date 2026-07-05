@@ -48,7 +48,7 @@ function settled<T>(result: PromiseSettledResult<T>, fallback: T): T {
 /**
  * Attach display metadata to a registry pair. Each read settles on its own
  * (the client batches them into one multicall), so a single misbehaving
- * token degrades to placeholder fields instead of hiding the pair — the
+ * token degrades to placeholder fields instead of hiding the pair, so the
  * registry, not token metadata, decides what is listed.
  */
 async function enrichPair(pair: TokenWrapperPair): Promise<EnrichedPair> {
