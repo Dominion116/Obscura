@@ -1,11 +1,6 @@
 'use client'
 import React, { useRef } from 'react'
-import { useReadContract } from 'wagmi'
-import {
-  registryAbi,
-  WRAPPERS_REGISTRY_ADDRESS,
-  SEPOLIA_CHAIN_ID,
-} from '@obscura/shared'
+import { useGlobalStats } from '@/hooks/use-stats'
 import { TimelineAnimation } from '@/components/ui/timeline-animation'
 import { Badge } from '@/components/ui/badge'
 import { ShieldCheck } from 'lucide-react'
@@ -13,22 +8,16 @@ import { ShieldCheck } from 'lucide-react'
 export const StatsBento = () => {
   const sectionRef = useRef<HTMLElement>(null)
 
-  // Live figures straight from the canonical registry on Sepolia — the
-  // same read the old stats band used, poured into the bento tiles.
-  const { data: pairs, isLoading } = useReadContract({
-    abi: registryAbi,
-    address: WRAPPERS_REGISTRY_ADDRESS,
-    functionName: 'getTokenConfidentialTokenPairs',
-    chainId: SEPOLIA_CHAIN_ID,
-  })
+  // Reads through the indexer's cached aggregate (PRD §7.7), falling back to
+  // a direct on-chain read if the API is unreachable — see useGlobalStats.
+  const { data: stats, isPending } = useGlobalStats()
 
-  const total = pairs?.length
-  const valid = pairs?.filter((p) => p.isValid).length
-  const revoked =
-    total !== undefined && valid !== undefined ? total - valid : undefined
+  const total = stats?.totalPairs
+  const valid = stats?.validPairs
+  const revoked = stats?.revokedPairs
 
   const fmt = (n: number | undefined) =>
-    isLoading || n === undefined ? '—' : String(n)
+    isPending || n === undefined ? '—' : String(n)
 
   // One viewport-height section holding the problem statement and the stats
   // grid, vertically centered. min-h (not a hard h) renders exactly 100vh

@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { PageStub } from "@/components/shared/page-stub";
+import { ActivityFeed } from "@/components/activity/activity-feed";
 
-export const metadata: Metadata = { title: "Activity" };
+export const metadata: Metadata = {
+  title: "Activity",
+  description:
+    "A live stream of wraps, unwraps, registrations, and revocations across the whole registry, using only public data.",
+};
 
 export default function ActivityPage() {
-  return (
-    <PageStub
-      title="Activity"
-      description="A live stream of wraps, unwraps, registrations, and revocations across the whole registry, using only public data."
-      phase="Phase 5"
-    />
-  );
+  return <ActivityFeed />;
 }

@@ -1,0 +1,24 @@
+# Render Blueprint for the Obscura indexer/API (apps/api).
+# Deploy: Render dashboard -> New -> Blueprint -> select this repo.
+# rootDir is intentionally omitted (defaults to the repo root) — this is an
+# npm-workspaces monorepo, so `npm install` must run at the root to link the
+# @obscura/shared workspace package correctly.
+
+services:
+  - type: web
+    name: obscura-api
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm run start --workspace=apps/api
+    healthCheckPath: /api/health
+    envVars:
+      # Secrets — Render prompts for these once during Blueprint creation.
+      - key: MONGODB_URI
+        sync: false
+      - key: SEPOLIA_RPC_URL
+        sync: false
+      # Update this once the frontend is deployed (Vercel URL instead of *).
+      - key: CORS_ORIGIN
+        value: "*"
