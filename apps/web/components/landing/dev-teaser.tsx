@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BlurReveal } from "@/components/shared/blur-reveal";
+import { CodeWindow } from "./code-window";
 import { env } from "@/config/env";
 
 const snippet = `import { registryAbi, WRAPPERS_REGISTRY_ADDRESS } from "@obscura/shared";
@@ -39,11 +40,7 @@ export function DevTeaser() {
           </a>
         </BlurReveal>
         <BlurReveal delay={0.15} className="min-w-0">
-          {/* pre-wrap: long lines continue on the next line instead of
-              widening the grid column past the viewport */}
-          <pre className="whitespace-pre-wrap break-words rounded-xl border border-border bg-card p-6 font-mono text-xs leading-relaxed text-muted-foreground">
-            <code>{snippet}</code>
-          </pre>
+          <CodeWindow code={snippet} />
         </BlurReveal>
       </div>
     </section>
