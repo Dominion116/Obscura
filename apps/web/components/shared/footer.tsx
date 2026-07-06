@@ -13,11 +13,16 @@ const productLinks = [
   { href: "/activity", label: "Activity" },
 ];
 
+const legalLinks = [
+  { href: "/terms", label: "Terms of Service" },
+  { href: "/privacy", label: "Privacy Policy" },
+];
+
 export function Footer() {
   return (
     <footer className="border-t border-border">
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-4">
-        <div className="md:col-span-2">
+      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 sm:grid-cols-2 md:grid-cols-5">
+        <div className="sm:col-span-2">
           <p className="text-lg font-semibold tracking-tight">
             obscura<span className="text-primary">.</span>
           </p>
@@ -85,6 +90,22 @@ export function Footer() {
                 Registry {shortAddress(WRAPPERS_REGISTRY_ADDRESS)}
               </a>
             </li>
+          </ul>
+        </nav>
+
+        <nav aria-label="Legal">
+          <p className="text-sm font-semibold">Legal</p>
+          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+            {legalLinks.map((l) => (
+              <li key={l.href}>
+                <Link
+                  href={l.href}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {l.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
       </div>

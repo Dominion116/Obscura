@@ -3,7 +3,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Menu, X, ChevronRight, EyeOff } from 'lucide-react'
+import { Menu, X, ChevronRight } from 'lucide-react'
 import { useScroll, motion } from 'motion/react'
 import { env } from '@/config/env'
 
@@ -180,8 +180,7 @@ const HeroHeader = () => {
 
 const Logo = ({ className }: { className?: string }) => {
     return (
-        <span className={cn('flex items-center gap-2', className)}>
-            <EyeOff className="size-5" aria-hidden />
+        <span className={cn('flex items-center', className)}>
             <span className="text-lg font-semibold tracking-tight">Obscura</span>
         </span>
     )
