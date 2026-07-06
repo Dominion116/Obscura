@@ -32,8 +32,8 @@ export function TrustSecurity() {
       <div className="mt-12 grid gap-4 md:grid-cols-3">
         {items.map((item, i) => (
           <BlurReveal key={item.title} delay={i * 0.1}>
-            <div className="h-full rounded-xl border border-border bg-card p-6">
-              <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
+            <div className="group h-full rounded-xl border border-border bg-card p-6 transition-[border-color,transform] duration-300 hover:-translate-y-1 hover:border-primary/40">
+              <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground transition-transform duration-300 group-hover:scale-110">
                 <item.icon className="size-5" aria-hidden />
               </span>
               <h3 className="mt-4 font-medium tracking-tight">{item.title}</h3>

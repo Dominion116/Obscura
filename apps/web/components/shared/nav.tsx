@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { NetworkBadge } from "./network-badge";
 import { TxTracker } from "./tx-tracker";
@@ -26,7 +27,12 @@ export function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40">
+    <motion.header
+      initial={{ opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="sticky top-0 z-40"
+    >
       <div className="border-b border-border bg-background/80 backdrop-blur-xl">
         <nav
           aria-label="Main"
@@ -92,8 +98,15 @@ export function Nav() {
           </div>
         </nav>
 
-        {mobileOpen && (
-          <div className="border-t border-border px-6 pb-4 md:hidden">
+        <AnimatePresence initial={false}>
+          {mobileOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0, y: -8 }}
+            animate={{ height: "auto", opacity: 1, y: 0 }}
+            exit={{ height: 0, opacity: 0, y: -8 }}
+            transition={{ duration: 0.24, ease: [0.21, 0.47, 0.32, 0.98] }}
+            className="overflow-hidden border-t border-border px-6 pb-4 md:hidden"
+          >
             <ul className="flex flex-col gap-1 pt-3">
               {links.map((link) => {
                 const className = cn(
@@ -132,9 +145,10 @@ export function Nav() {
               <NetworkBadge />
               <WalletButton />
             </div>
-          </div>
-        )}
+          </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </header>
+    </motion.header>
   );
 }

@@ -11,6 +11,7 @@ import type { ActivityType, EnrichedPair } from "@obscura/shared";
 import { useActivityFeed } from "@/hooks/use-activity";
 import { useRegistryPairs } from "@/hooks/use-registry";
 import { ActivityItem } from "./activity-item";
+import { BlurReveal } from "@/components/shared/blur-reveal";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,7 @@ export function ActivityFeed() {
 
   return (
     <div className="flex flex-col gap-6">
+      <BlurReveal>
       <header>
         <h1 className="text-3xl font-semibold tracking-tight">Activity</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
@@ -64,8 +66,9 @@ export function ActivityFeed() {
           data.
         </p>
       </header>
+      </BlurReveal>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <BlurReveal delay={0.08} className="flex flex-wrap items-center gap-2">
         <div
           role="group"
           aria-label="Filter by event type"
@@ -100,7 +103,7 @@ export function ActivityFeed() {
             aria-hidden
           />
         </Button>
-      </div>
+      </BlurReveal>
 
       {feed.isPending ? (
         <FeedSkeleton />

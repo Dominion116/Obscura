@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { motion } from "motion/react";
 import type { EnrichedPair } from "@obscura/shared";
 import { Button } from "@/components/ui/button";
 import { AddressLink } from "./address-link";
@@ -17,10 +18,18 @@ export function PairCards({
 }) {
   return (
     <ul className="flex flex-col gap-3">
-      {pairs.map((pair) => (
-        <li
+      {pairs.map((pair, index) => (
+        <motion.li
           key={pair.confidentialTokenAddress}
-          className="rounded-xl border border-border bg-card p-4"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.32,
+            delay: Math.min(index, 10) * 0.04,
+            ease: [0.21, 0.47, 0.32, 0.98],
+          }}
+          whileHover={{ y: -3 }}
+          className="rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
         >
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -83,7 +92,7 @@ export function PairCards({
             Open actions
             <ChevronRight className="ml-1.5 size-4" aria-hidden />
           </Button>
-        </li>
+        </motion.li>
       ))}
     </ul>
   );

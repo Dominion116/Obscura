@@ -5,6 +5,7 @@
 // same drawer for wrap, unwrap, and transfer actions on this pair.
 
 import { Eye, EyeOff, Loader2, SlidersHorizontal } from "lucide-react";
+import { motion } from "motion/react";
 import { formatUnits } from "viem";
 import type { EnrichedPair, Hex } from "@obscura/shared";
 import { useDecryptBalance } from "@/hooks/use-decrypt";
@@ -27,7 +28,13 @@ export function HoldingCard({
   const busy = step !== "idle";
 
   return (
-    <li className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
+    <motion.li
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.32, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-medium">
@@ -95,6 +102,6 @@ export function HoldingCard({
       <div className="flex items-center gap-1.5 border-t border-border pt-3 text-xs text-muted-foreground">
         Wrapper <AddressLink address={pair.confidentialTokenAddress} />
       </div>
-    </li>
+    </motion.li>
   );
 }

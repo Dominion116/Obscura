@@ -17,6 +17,7 @@ import { removeUnwrap, useUnwrapRequests } from "@/lib/unwrap-store";
 import { useWalletReady, WalletGateNotice } from "@/components/shared/wallet-gate";
 import { UnwrapRequestItem } from "@/components/shared/unwrap-request-item";
 import { PairDrawer } from "@/components/pair/pair-drawer";
+import { BlurReveal } from "@/components/shared/blur-reveal";
 import { HoldingCard } from "./holding-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,8 +60,12 @@ export function PortfolioView() {
   if (!ready) {
     return (
       <div className="flex flex-col gap-6">
-        <Header />
-        <WalletGateNotice />
+        <BlurReveal>
+          <Header />
+        </BlurReveal>
+        <BlurReveal delay={0.08}>
+          <WalletGateNotice />
+        </BlurReveal>
       </div>
     );
   }
@@ -74,9 +79,11 @@ export function PortfolioView() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Header />
+      <BlurReveal>
+        <Header />
+      </BlurReveal>
 
-      <section className="flex flex-col gap-4">
+      <BlurReveal delay={0.08} className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-medium">Holdings</h2>
           <Button
@@ -114,9 +121,9 @@ export function PortfolioView() {
             ))}
           </ul>
         )}
-      </section>
+      </BlurReveal>
 
-      <section className="flex flex-col gap-4">
+      <BlurReveal delay={0.16} className="flex flex-col gap-4">
         <h2 className="text-lg font-medium">Unwrap requests</h2>
         {requests.length === 0 ? (
           <p className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
@@ -164,7 +171,7 @@ export function PortfolioView() {
             )}
           </div>
         )}
-      </section>
+      </BlurReveal>
 
       <PairDrawer pair={selected} onClose={() => setSelected(null)} />
     </div>

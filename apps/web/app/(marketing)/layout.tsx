@@ -1,4 +1,5 @@
 import { Footer } from "@/components/shared/footer";
+import { AnimatedPage } from "@/components/shared/animated-page";
 
 // The hero template block renders its own floating header; the layout owns
 // the single <main> landmark so every section (not just the hero) is inside
@@ -9,7 +10,7 @@ export default function MarketingLayout({
   return (
     <>
       <main id="main-content" className="overflow-x-hidden">
-        {children}
+        <AnimatedPage>{children}</AnimatedPage>
       </main>
       <Footer />
     </>

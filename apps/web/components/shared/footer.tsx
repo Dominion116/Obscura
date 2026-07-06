@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "motion/react";
 import {
   WRAPPERS_REGISTRY_ADDRESS,
   explorerAddressUrl,
@@ -20,7 +23,13 @@ const legalLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border">
+    <motion.footer
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="border-t border-border"
+    >
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 sm:grid-cols-2 md:grid-cols-5">
         <div className="sm:col-span-2">
           <p className="text-lg font-semibold tracking-tight">
@@ -110,6 +119,6 @@ export function Footer() {
           </ul>
         </nav>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

@@ -176,6 +176,22 @@
     letter-spacing: var(--tracking-normal);
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    @apply transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out;
+  }
+
+  ::selection {
+    @apply bg-primary/30 text-foreground;
+  }
+
   /* Accessibility: honor reduced-motion preferences for CSS-driven
      animations and transitions across the whole UI. */
   @media (prefers-reduced-motion: reduce) {
@@ -187,5 +203,21 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
   }
 }

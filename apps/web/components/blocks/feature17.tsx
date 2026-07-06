@@ -1,6 +1,7 @@
 import { Lock, Search, Send, Unlock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BlurReveal } from "@/components/shared/blur-reveal";
 
 import { cn } from "@/lib/utils";
 
@@ -83,20 +84,21 @@ const Feature17 = (props: Props) => {
     <section className={cn("py-24 md:py-32", className)}>
       <div className="mx-auto max-w-7xl px-6">
         {(label || heading) && (
-          <div className="mb-12 flex max-w-3xl flex-col items-start gap-4 text-left">
+          <BlurReveal className="mb-12 flex max-w-3xl flex-col items-start gap-4 text-left">
             {label && <Badge variant="secondary">{label}</Badge>}
             <h2 className="text-3xl font-semibold tracking-tight text-pretty md:text-4xl lg:text-5xl">
               {heading}
             </h2>
-          </div>
+          </BlurReveal>
         )}
         <div className="grid max-w-6xl gap-12 md:grid-cols-2">
           {items.map((feature, idx) => (
-            <div
+            <BlurReveal
               key={idx}
-              className="flex gap-6 rounded-lg md:block md:space-y-4"
+              delay={idx * 0.08}
+              className="group flex gap-6 rounded-lg transition-transform duration-300 hover:-translate-y-1 md:block md:space-y-4"
             >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent md:size-12">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent transition-transform duration-300 group-hover:scale-110 md:size-12">
                 {feature.icon}
               </span>
               <div>
@@ -107,15 +109,15 @@ const Feature17 = (props: Props) => {
                   {feature.description}
                 </p>
               </div>
-            </div>
+            </BlurReveal>
           ))}
         </div>
         {buttons?.primary?.url && (
-          <div className="mt-16 flex justify-start">
+          <BlurReveal delay={0.2} className="mt-16 flex justify-start">
             <Button size="lg" asChild>
               <a href={buttons.primary.url}>{buttons.primary.text}</a>
             </Button>
-          </div>
+          </BlurReveal>
         )}
       </div>
     </section>

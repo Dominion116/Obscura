@@ -1,4 +1,7 @@
+"use client";
+
 import type { ComponentType } from "react";
+import { motion } from "motion/react";
 import {
   ArrowRightLeft,
   CheckCircle2,
@@ -91,7 +94,13 @@ export function ActivityItem({
   const Icon = ICONS[event.type];
 
   return (
-    <li className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+    <motion.li
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
+    >
       <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
       <div className="min-w-0 flex-1">
         <p className="text-sm">{describe(event, pair)}</p>
@@ -107,6 +116,6 @@ export function ActivityItem({
           </a>
         </div>
       </div>
-    </li>
+    </motion.li>
   );
 }

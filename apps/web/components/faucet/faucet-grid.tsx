@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowRight, Droplets, Loader2, RefreshCw } from "lucide-react";
+import { motion } from "motion/react";
 import { explorerTxUrl } from "@obscura/shared";
 import {
   FAUCET_TOKENS_PER_MINT,
@@ -17,6 +18,7 @@ import {
 import { formatTokenAmount } from "@/lib/format";
 import { useWalletReady, WalletGateNotice } from "@/components/shared/wallet-gate";
 import { AddressLink } from "@/components/registry/address-link";
+import { BlurReveal } from "@/components/shared/blur-reveal";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -47,7 +49,9 @@ export function FaucetGrid() {
 
   return (
     <div className="flex flex-col gap-6">
-      <WalletGateNotice />
+      <BlurReveal>
+        <WalletGateNotice />
+      </BlurReveal>
 
       {isPending ? (
         <FaucetSkeleton />
@@ -68,9 +72,16 @@ export function FaucetGrid() {
           {tokens?.map((token) => {
             const isMintingThis = minting === token.underlying;
             return (
-              <li
+              <motion.li
                 key={token.underlying}
-                className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -3 }}
+                transition={{
+                  duration: 0.32,
+                  ease: [0.21, 0.47, 0.32, 0.98],
+                }}
+                className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -121,13 +132,13 @@ export function FaucetGrid() {
                     ? "Minting…"
                     : `Mint ${FAUCET_TOKENS_PER_MINT.toLocaleString("en-US")} ${token.symbol}`}
                 </Button>
-              </li>
+              </motion.li>
             );
           })}
         </ul>
       )}
 
-      <p className="text-sm text-muted-foreground">
+      <BlurReveal delay={0.12} className="text-sm text-muted-foreground">
         Minted a token? Head to the{" "}
         <Link
           href="/registry"
@@ -136,7 +147,7 @@ export function FaucetGrid() {
           registry <ArrowRight className="size-3.5" aria-hidden />
         </Link>{" "}
         and open its pair to wrap it into a confidential token.
-      </p>
+      </BlurReveal>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { motion } from "motion/react";
 import type { EnrichedPair } from "@obscura/shared";
 import {
   Table,
@@ -24,7 +25,13 @@ export function PairTable({
   onSelect: (pair: EnrichedPair) => void;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="rounded-xl border border-border bg-card"
+    >
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
@@ -44,15 +51,22 @@ export function PairTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {pairs.map((pair) => (
-            <TableRow
+          {pairs.map((pair, index) => (
+            <motion.tr
               key={pair.confidentialTokenAddress}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                duration: 0.28,
+                delay: Math.min(index, 12) * 0.025,
+                ease: [0.21, 0.47, 0.32, 0.98],
+              }}
               onClick={(e) => {
                 // Explorer links inside the row keep their own behaviour.
                 if ((e.target as HTMLElement).closest("a")) return;
                 onSelect(pair);
               }}
-              className="cursor-pointer"
+              className="cursor-pointer border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
             >
               <TableCell>
                 <div className="flex flex-col gap-1">
@@ -99,10 +113,10 @@ export function PairTable({
                   <ChevronRight className="size-4" aria-hidden />
                 </Button>
               </TableCell>
-            </TableRow>
+            </motion.tr>
           ))}
         </TableBody>
       </Table>
-    </div>
+    </motion.div>
   );
 }

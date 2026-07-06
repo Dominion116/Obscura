@@ -19,11 +19,19 @@ export function HeroSection() {
                 <section className="relative min-h-screen">
                     <div className="py-24 md:pb-32 lg:pb-36 lg:pt-72">
                         <div className="relative z-10 mx-auto flex max-w-7xl flex-col px-6 lg:block lg:px-12">
-                            <div className="mx-auto max-w-lg text-center lg:ml-0 lg:max-w-full lg:text-left">
+                            <motion.div
+                                initial={{ opacity: 0, y: 18, filter: 'blur(10px)' }}
+                                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
+                                className="mx-auto max-w-lg text-center lg:ml-0 lg:max-w-full lg:text-left">
                                 <h1 className="mt-8 max-w-2xl text-balance text-5xl font-semibold tracking-tight md:text-6xl lg:mt-16 xl:text-7xl">Move value privately on Ethereum</h1>
                                 <p className="mt-8 max-w-2xl text-balance text-lg">Every confidential token wrapper on Sepolia in one place. Browse the registry, wrap ERC-20s into encrypted ERC-7984 tokens, and decrypt balances only you can see.</p>
 
-                                <div className="mt-12 flex flex-col items-center justify-center gap-2 sm:flex-row lg:justify-start">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.45, delay: 0.25, ease: [0.21, 0.47, 0.32, 0.98] }}
+                                    className="mt-12 flex flex-col items-center justify-center gap-2 sm:flex-row lg:justify-start">
                                     <Button
                                         asChild
                                         size="lg"
@@ -49,13 +57,17 @@ export function HeroSection() {
                                             <span className="text-nowrap">Build with it</span>
                                         </a>
                                     </Button>
-                                </div>
-                            </div>
+                                </motion.div>
+                            </motion.div>
                         </div>
                         {/* no aspect-ratio classes: with all four insets set, the
                             browser would keep the aspect height and ignore bottom,
                             letting content overflow the frame on short viewports */}
-                        <div className="absolute inset-1 overflow-hidden rounded-3xl border border-black/10 lg:rounded-[3rem] dark:border-white/5">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.985 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
+                            className="absolute inset-1 overflow-hidden rounded-3xl border border-black/10 lg:rounded-[3rem] dark:border-white/5">
                             {/* crossOrigin: the app ships COEP require-corp headers
                                 (Relayer SDK WASM); cross-origin media must be fetched
                                 in CORS mode or the browser blocks it */}
@@ -67,7 +79,7 @@ export function HeroSection() {
                                 crossOrigin="anonymous"
                                 className="size-full object-cover opacity-50 invert dark:opacity-35 dark:invert-0 dark:lg:opacity-75"
                                 src="https://ik.imagekit.io/lrigu76hy/tailark/dna-video.mp4?updatedAt=1745736251477"></video>
-                        </div>
+                        </motion.div>
                     </div>
                 </section>
             </div>

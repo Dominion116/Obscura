@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { PairDrawer } from "@/components/pair/pair-drawer";
+import { BlurReveal } from "@/components/shared/blur-reveal";
 import { PairTable } from "./pair-table";
 import { PairCards } from "./pair-cards";
 
@@ -63,6 +64,7 @@ export function RegistryExplorer() {
 
   return (
     <div className="flex flex-col gap-6">
+      <BlurReveal>
       <header>
         <h1 className="text-3xl font-semibold tracking-tight">
           Registry explorer
@@ -73,8 +75,12 @@ export function RegistryExplorer() {
           but are flagged and blocked from wrapping.
         </p>
       </header>
+      </BlurReveal>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <BlurReveal
+        delay={0.08}
+        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div className="relative w-full sm:max-w-sm">
           <Search
             className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -132,7 +138,7 @@ export function RegistryExplorer() {
             />
           </Button>
         </div>
-      </div>
+      </BlurReveal>
 
       {isPending ? (
         <PairListSkeleton />
