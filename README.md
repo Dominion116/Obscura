@@ -122,6 +122,7 @@ The web app runs at `http://localhost:3000`.
 | `NEXT_PUBLIC_REOWN_PROJECT_ID` | Reown AppKit project id for wallet connection |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Sepolia RPC endpoint (public default provided) |
 | `NEXT_PUBLIC_API_URL` | Base URL of the Obscura API once deployed |
+| `NEXT_PUBLIC_SITE_URL` | Set on apps/web; canonical URL and social preview metadata base: `https://obs-cura.vercel.app` |
 | `NEXT_PUBLIC_DOCS_URL` | Set on apps/web; points at the deployed docs site: `https://obscura-doc.vercel.app` |
 | `NEXT_PUBLIC_APP_URL` | Set on apps/docs; points at the deployed web app: `https://obs-cura.vercel.app` |
 | `MONGODB_URI` | MongoDB Atlas connection string (indexer/API) |
