@@ -27,8 +27,9 @@ export function Footer() {
             obscura<span className="text-primary">.</span>
           </p>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-            The confidential wrapper registry, made usable. Built for the Zama
-            Developer Program, Mainnet Season 3 bounty track.
+            The confidential wrapper registry, made usable. An open-source
+            reference implementation for the Zama Confidential Token
+            Wrappers Registry on Sepolia.
           </p>
         </div>
 

@@ -34,8 +34,8 @@ const navbar = (
 
 const footer = (
   <Footer>
-    Obscura, built for the Zama Developer Program, Mainnet Season 3 bounty
-    track. Sepolia testnet only.
+    Obscura, an open-source reference implementation for the Zama
+    Confidential Token Wrappers Registry. Sepolia testnet only.
   </Footer>
 );
 

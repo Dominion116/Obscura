@@ -31,9 +31,7 @@ export default function TermsPage() {
           Confidential Token Wrappers Registry on the Ethereum Sepolia test
           network. It lets you browse registered ERC-20 to ERC-7984 wrapper
           pairs, wrap and unwrap tokens, transfer confidential tokens, decrypt
-          your own balances, and mint test tokens from a faucet. It was built
-          as a reference implementation for the Zama Developer Program,
-          Mainnet Season 3 bounty track.
+          your own balances, and mint test tokens from a faucet.
         </p>
       </LegalSection>
 

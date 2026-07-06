@@ -4,8 +4,6 @@
 
 Obscura is a production-ready web application built on the [Zama Confidential Token Wrappers Registry](https://docs.zama.org/protocol/protocol-apps/confidential-tokens/wrapper-registry). It surfaces every ERC-20 to ERC-7984 wrapper pair registered on Ethereum Sepolia, lets anyone wrap and unwrap tokens, decrypts confidential balances entirely client-side, and ships a faucet for the official cTokenMocks so testers always have tokens to work with.
 
-Built for the **Zama Developer Program, Mainnet Season 3, Bounty Track**.
-
 **Live app:** https://obs-cura.vercel.app
 **Developer docs:** https://obscura-doc.vercel.app
 
