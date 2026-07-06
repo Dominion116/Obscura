@@ -19,6 +19,5 @@ services:
         sync: false
       - key: SEPOLIA_RPC_URL
         sync: false
-      # Update this once the frontend is deployed (Vercel URL instead of *).
       - key: CORS_ORIGIN
-        value: "*"
+        value: "https://obs-cura.vercel.app"

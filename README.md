@@ -6,6 +6,9 @@ Obscura is a production-ready web application built on the [Zama Confidential To
 
 Built for the **Zama Developer Program, Mainnet Season 3, Bounty Track**.
 
+**Live app:** https://obs-cura.vercel.app
+**Developer docs:** https://obscura-doc.vercel.app
+
 ---
 
 ## Why Obscura exists
@@ -89,6 +92,7 @@ obscura/
       lib/               fhevm client, wagmi/reown config, utilities
       providers/         wagmi, react-query, appkit bootstrap
       config/            client-safe env access
+    docs/                Standalone Nextra developer reference
     api/                 Node/Express indexer + REST API
   packages/
     shared/              ABIs (verified via Sourcify), Sepolia addresses, types
@@ -120,6 +124,8 @@ The web app runs at `http://localhost:3000`.
 | `NEXT_PUBLIC_REOWN_PROJECT_ID` | Reown AppKit project id for wallet connection |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Sepolia RPC endpoint (public default provided) |
 | `NEXT_PUBLIC_API_URL` | Base URL of the Obscura API once deployed |
+| `NEXT_PUBLIC_DOCS_URL` | Set on apps/web; points at the deployed docs site: `https://obscura-doc.vercel.app` |
+| `NEXT_PUBLIC_APP_URL` | Set on apps/docs; points at the deployed web app: `https://obs-cura.vercel.app` |
 | `MONGODB_URI` | MongoDB Atlas connection string (indexer/API) |
 | `SEPOLIA_RPC_URL` | RPC endpoint for the indexer |
 
