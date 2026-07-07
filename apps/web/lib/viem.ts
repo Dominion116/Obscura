@@ -1,5 +1,6 @@
-import { createPublicClient, http } from "viem";
-import { sepolia } from "viem/chains";
+import { createPublicClient, http, type PublicClient } from "viem";
+import { mainnet, sepolia } from "viem/chains";
+import type { RegistryNetwork } from "@obscura/shared";
 import { env } from "@/config/env";
 
 // Dedicated read-only client, independent of the connected wallet, so the
@@ -10,3 +11,16 @@ export const publicClient = createPublicClient({
   transport: http(env.sepoliaRpcUrl),
   batch: { multicall: { wait: 16 } },
 });
+
+// Browses the mainnet Wrappers Registry. Strictly read-only: no wallet ever
+// connects to mainnet in this app, and no write path uses this client.
+export const mainnetClient = createPublicClient({
+  chain: mainnet,
+  transport: http(env.mainnetRpcUrl),
+  batch: { multicall: { wait: 16 } },
+});
+
+export const registryClients: Record<RegistryNetwork, PublicClient> = {
+  sepolia: publicClient,
+  mainnet: mainnetClient,
+};

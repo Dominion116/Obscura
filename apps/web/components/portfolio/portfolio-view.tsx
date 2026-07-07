@@ -18,6 +18,7 @@ import { useWalletReady, WalletGateNotice } from "@/components/shared/wallet-gat
 import { UnwrapRequestItem } from "@/components/shared/unwrap-request-item";
 import { PairDrawer } from "@/components/pair/pair-drawer";
 import { BlurReveal } from "@/components/shared/blur-reveal";
+import { DecryptAnyToken } from "./decrypt-any-token";
 import { HoldingCard } from "./holding-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -124,6 +125,11 @@ export function PortfolioView() {
       </BlurReveal>
 
       <BlurReveal delay={0.16} className="flex flex-col gap-4">
+        <h2 className="text-lg font-medium">Decrypt any token</h2>
+        <DecryptAnyToken />
+      </BlurReveal>
+
+      <BlurReveal delay={0.24} className="flex flex-col gap-4">
         <h2 className="text-lg font-medium">Unwrap requests</h2>
         {requests.length === 0 ? (
           <p className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">

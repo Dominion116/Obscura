@@ -2,20 +2,27 @@
 
 import { ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
-import type { EnrichedPair } from "@obscura/shared";
+import type { EnrichedPair, RegistryNetwork } from "@obscura/shared";
 import { Button } from "@/components/ui/button";
 import { AddressLink } from "./address-link";
 import { ValidityBadge } from "./validity-badge";
 import { formatRate, formatTokenAmount } from "@/lib/format";
 
-/** Mobile layout: the same pair data as the table, stacked as cards. */
+/**
+ * Mobile layout: the same pair data as the table, stacked as cards. Mainnet
+ * cards are read-only (actions run on Sepolia), so the actions button is
+ * omitted there.
+ */
 export function PairCards({
   pairs,
   onSelect,
+  network = "sepolia",
 }: {
   pairs: EnrichedPair[];
   onSelect: (pair: EnrichedPair) => void;
+  network?: RegistryNetwork;
 }) {
+  const readOnly = network === "mainnet";
   return (
     <ul className="flex flex-col gap-3">
       {pairs.map((pair, index) => (
@@ -42,7 +49,7 @@ export function PairCards({
                 {pair.tokenName}
               </p>
             </div>
-            <ValidityBadge isValid={pair.isValid} />
+            <ValidityBadge isValid={pair.isValid} source={pair.source} />
           </div>
 
           <dl className="mt-4 grid grid-cols-3 gap-2 text-sm">
@@ -77,21 +84,27 @@ export function PairCards({
 
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-3">
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              Token <AddressLink address={pair.tokenAddress} />
+              Token <AddressLink address={pair.tokenAddress} network={network} />
             </span>
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              Wrapper <AddressLink address={pair.confidentialTokenAddress} />
+              Wrapper{" "}
+              <AddressLink
+                address={pair.confidentialTokenAddress}
+                network={network}
+              />
             </span>
           </div>
 
-          <Button
-            variant="outline"
-            onClick={() => onSelect(pair)}
-            className="mt-4 w-full"
-          >
-            Open actions
-            <ChevronRight className="ml-1.5 size-4" aria-hidden />
-          </Button>
+          {!readOnly && (
+            <Button
+              variant="outline"
+              onClick={() => onSelect(pair)}
+              className="mt-4 w-full"
+            >
+              Open actions
+              <ChevronRight className="ml-1.5 size-4" aria-hidden />
+            </Button>
+          )}
         </motion.li>
       ))}
     </ul>

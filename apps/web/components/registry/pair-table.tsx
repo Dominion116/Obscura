@@ -2,7 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
-import type { EnrichedPair } from "@obscura/shared";
+import type { EnrichedPair, RegistryNetwork } from "@obscura/shared";
 import {
   Table,
   TableBody,
@@ -16,14 +16,21 @@ import { AddressLink } from "./address-link";
 import { ValidityBadge } from "./validity-badge";
 import { formatRate, formatTokenAmount } from "@/lib/format";
 
-/** Desktop layout: one row per registered pair (PRD §7.2). */
+/**
+ * Desktop layout: one row per registered pair (PRD §7.2). Mainnet rows are
+ * read-only: actions run on Sepolia, so no drawer opens there and the
+ * explorer links point at mainnet Etherscan instead.
+ */
 export function PairTable({
   pairs,
   onSelect,
+  network = "sepolia",
 }: {
   pairs: EnrichedPair[];
   onSelect: (pair: EnrichedPair) => void;
+  network?: RegistryNetwork;
 }) {
+  const readOnly = network === "mainnet";
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -62,22 +69,30 @@ export function PairTable({
                 ease: [0.21, 0.47, 0.32, 0.98],
               }}
               onClick={(e) => {
+                if (readOnly) return;
                 // Explorer links inside the row keep their own behaviour.
                 if ((e.target as HTMLElement).closest("a")) return;
                 onSelect(pair);
               }}
-              className="cursor-pointer border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              className={
+                readOnly
+                  ? "border-b transition-colors hover:bg-muted/50"
+                  : "cursor-pointer border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              }
             >
               <TableCell>
                 <div className="flex flex-col gap-1">
                   <span className="font-medium">{pair.tokenSymbol}</span>
-                  <AddressLink address={pair.tokenAddress} />
+                  <AddressLink address={pair.tokenAddress} network={network} />
                 </div>
               </TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
                   <span className="font-medium">{pair.wrapperSymbol}</span>
-                  <AddressLink address={pair.confidentialTokenAddress} />
+                  <AddressLink
+                    address={pair.confidentialTokenAddress}
+                    network={network}
+                  />
                 </div>
               </TableCell>
               <TableCell
@@ -101,17 +116,19 @@ export function PairTable({
                 </span>
               </TableCell>
               <TableCell>
-                <ValidityBadge isValid={pair.isValid} />
+                <ValidityBadge isValid={pair.isValid} source={pair.source} />
               </TableCell>
               <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onSelect(pair)}
-                  aria-label={`Open actions for ${pair.tokenSymbol} → ${pair.wrapperSymbol}`}
-                >
-                  <ChevronRight className="size-4" aria-hidden />
-                </Button>
+                {!readOnly && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onSelect(pair)}
+                    aria-label={`Open actions for ${pair.tokenSymbol} → ${pair.wrapperSymbol}`}
+                  >
+                    <ChevronRight className="size-4" aria-hidden />
+                  </Button>
+                )}
               </TableCell>
             </motion.tr>
           ))}
