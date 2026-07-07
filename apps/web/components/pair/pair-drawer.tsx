@@ -39,7 +39,7 @@ export function PairDrawer({
                   <span className="text-muted-foreground"> → </span>
                   {pair.wrapperSymbol}
                 </SheetTitle>
-                <ValidityBadge isValid={pair.isValid} />
+                <ValidityBadge isValid={pair.isValid} source={pair.source} />
               </div>
               <SheetDescription>{pair.wrapperName}</SheetDescription>
               <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">

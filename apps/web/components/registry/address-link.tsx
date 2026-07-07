@@ -1,12 +1,22 @@
 import { ExternalLink } from "lucide-react";
-import { explorerAddressUrl, type Address } from "@obscura/shared";
+import {
+  explorerAddressUrl,
+  type Address,
+  type RegistryNetwork,
+} from "@obscura/shared";
 import { shortAddress } from "@/lib/format";
 
 /** Truncated address that links out to the block explorer for verification. */
-export function AddressLink({ address }: { address: Address }) {
+export function AddressLink({
+  address,
+  network = "sepolia",
+}: {
+  address: Address;
+  network?: RegistryNetwork;
+}) {
   return (
     <a
-      href={explorerAddressUrl(address)}
+      href={explorerAddressUrl(address, network)}
       target="_blank"
       rel="noopener noreferrer"
       title={address}
