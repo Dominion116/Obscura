@@ -166,20 +166,21 @@ The pair list is hybrid, with a strict priority order:
 
 1. **On-chain Wrappers Registry (primary source of truth).** The app pages through `getTokenConfidentialTokenPairsSlice` on the official registry contract at every load and refreshes each minute, so pairs that Zama registers or revokes appear automatically, with no code change or redeploy.
 2. **Local custom-pairs config (additive).** [`apps/web/config/custom-pairs.ts`](apps/web/config/custom-pairs.ts) declares extra pairs that are not (or not yet) in the official registry: dev-only wrappers, wrappers under review, or private test deployments. These are merged in after the registry pairs and shown with a **Custom** badge so nobody mistakes them for registry-validated entries.
+3. **Pairs added from the registry UI (additive, per browser).** The **Add a pair** control on the registry page lets a visitor declare a pair without touching code. It is checked on-chain before being accepted (the token must answer `decimals()`, the wrapper must answer `rate()`) and then stored in that browser's `localStorage`, so it is visible only to the person who added it, never to other visitors. These show a **Local** badge and can be removed from the same panel.
 
-Conflicts resolve in the registry's favour: if a wrapper declared locally later gets registered on-chain, the local entry is ignored automatically and the registry's validity flag takes over. Custom pairs support the same wrap, unwrap, transfer, and decrypt flows as registry pairs.
+Conflicts resolve in the registry's favour, then the local config's: if a wrapper declared in the local config or added through the UI later gets registered on-chain (or added to the local config), the lower-priority entry is ignored automatically. Custom and locally-added pairs support the same wrap, unwrap, transfer, and decrypt flows as registry pairs.
 
 ## Adding a new pair
 
-There are two paths, depending on whether the pair is official or your own.
+There are three paths, depending on whether the pair is official, meant to ship for everyone, or just for you to try out.
 
 ### Official pairs: register on-chain, zero app changes
 
 The registry is the source of truth, so the correct way to add an official pair is to have it registered in the Zama Wrappers Registry (registration is permissioned and goes through Zama; see the [wrapper registry docs](https://docs.zama.org/protocol/protocol-apps/confidential-tokens/wrapper-registry)). The moment the `ConfidentialTokenRegistered` event lands, Obscura picks the pair up on its next refresh. No code change, no redeploy.
 
-### Custom or dev-only pairs: one entry in the local config
+### Custom or dev-only pairs, for everyone: one entry in the local config
 
-For a wrapper that is not in the official registry (for example, one you deployed yourself while developing), add its addresses to [`apps/web/config/custom-pairs.ts`](apps/web/config/custom-pairs.ts):
+For a wrapper that is not in the official registry (for example, one you deployed yourself while developing) and that you want every visitor to see, add its addresses to [`apps/web/config/custom-pairs.ts`](apps/web/config/custom-pairs.ts):
 
 ```ts
 export const CUSTOM_PAIRS: readonly CustomPairConfig[] = [
@@ -195,6 +196,10 @@ export const CUSTOM_PAIRS: readonly CustomPairConfig[] = [
 That is the whole change. Symbol, name, decimals, conversion rate, and TVS are read on-chain from the two contracts, so only the addresses are declared. After a redeploy (`npm run build` or a push to the hosting branch), the pair appears in the registry explorer with a **Custom** badge, and every flow works against it: wrap, unwrap, confidential transfer, portfolio, and balance decryption.
 
 Requirements for the wrapper contract: it must implement the ERC-7984 confidential token surface used by the app (`wrap`, `unwrap`/`finalizeUnwrap`, `confidentialBalanceOf`, `rate`, `decimals`), which any wrapper built from Zama's confidential token contracts does.
+
+### Your own pair, no redeploy: the registry page's "Add a pair" form
+
+For trying out a wrapper without editing code at all, open the [registry page](https://obs-cura.vercel.app/registry) (or `/registry` locally), click **Add a pair**, and paste the ERC-20 and ERC-7984 wrapper addresses. The app checks both contracts on-chain before accepting them, then stores the pair in your browser's `localStorage` under a **Local** badge; it is visible only to you, not other visitors, and can be removed from the same panel. This is the fastest way to confirm a wrapper works with Obscura before deciding whether it belongs in `custom-pairs.ts` for everyone.
 
 ## Deployment
 

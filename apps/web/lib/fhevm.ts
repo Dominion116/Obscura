@@ -24,12 +24,15 @@ export function getFhevmInstance(): Promise<FhevmInstance> {
         "@zama-fhe/relayer-sdk/web"
       );
       await initSDK();
-      const injected = (window as { ethereum?: unknown }).ethereum;
       return createInstance({
         ...SepoliaConfig,
-        // Prefer the connected wallet's provider; fall back to plain RPC so
-        // read-side decryption still works without a wallet.
-        network: (injected as never) ?? env.sepoliaRpcUrl,
+        // Always use the app's dedicated RPC, same as every other read in
+        // the app (lib/viem.ts publicClient). The SDK uses this only for its
+        // own ACL/InputVerifier reads, never for signing, so routing it
+        // through the connected wallet's provider gained nothing and made
+        // those reads dependent on the wallet's own (often public,
+        // rate-limited) RPC and chain state instead of our known-good one.
+        network: env.sepoliaRpcUrl,
       });
     })().catch((error) => {
       // Allow a retry on the next call instead of caching the failure.

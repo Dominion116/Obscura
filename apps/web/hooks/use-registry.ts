@@ -4,12 +4,15 @@
 // the slice functions so the explorer keeps working as the registry grows,
 // and every pair carries its isValid flag so revoked wrappers are never
 // presented as usable. The source is hybrid: the onchain registry is the
-// primary source of truth, and pairs declared in the local custom-pairs
-// config are merged in after it (registry wins on conflicts). The registry
-// exists on Sepolia and Ethereum mainnet; mainnet is browse-only, so custom
-// pairs (which declare Sepolia addresses) are merged on Sepolia only. This
-// hook is deliberately plain viem + react-query so integrators can lift it
-// without pulling in the rest of the app.
+// primary source of truth; pairs declared in the local custom-pairs config
+// are merged in next; pairs a visitor added themselves through the registry
+// UI (stored in their browser only) are merged in last (registry wins over
+// custom, custom wins over a visitor's own local pair on the same wrapper).
+// The registry exists on Sepolia and Ethereum mainnet; mainnet is
+// browse-only, so custom and local pairs (which declare Sepolia addresses)
+// are merged on Sepolia only. This hook is deliberately plain viem +
+// react-query so integrators can lift it without pulling in the rest of the
+// app.
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,11 +20,13 @@ import {
   registryAbi,
   wrapperAbi,
   REGISTRY_NETWORKS,
+  type Address,
   type EnrichedPair,
   type RegistryNetwork,
   type TokenWrapperPair,
 } from "@obscura/shared";
 import { CUSTOM_PAIRS } from "@/config/custom-pairs";
+import { useLocalPairs, type LocalPairRecord } from "@/lib/local-pairs-store";
 import { registryClients } from "@/lib/viem";
 import { shortAddress } from "@/lib/format";
 
@@ -115,47 +120,67 @@ async function enrichPair(
 }
 
 /**
- * Pairs declared in the local config that the registry does not already
- * list. Registry entries win: if a wrapper later gets officially registered,
- * the local declaration is dropped automatically. Custom pairs carry no
- * registry validity flag, so they are treated as valid but labelled Custom
- * wherever validity is shown.
+ * Pairs from a declared list that a set of already-claimed wrapper addresses
+ * does not already cover. Used twice: once to layer CUSTOM_PAIRS over the
+ * registry, once to layer local (browser-only) pairs over registry + custom.
+ * Declared pairs carry no registry validity flag, so they are treated as
+ * valid but labelled by source wherever validity is shown.
  */
-function customPairsMissingFrom(
-  registryPairs: readonly TokenWrapperPair[],
+function pairsMissingFrom(
+  declared: readonly { tokenAddress: Address; confidentialTokenAddress: Address }[],
+  claimed: ReadonlySet<string>,
 ): TokenWrapperPair[] {
-  const registered = new Set(
-    registryPairs.map((pair) => pair.confidentialTokenAddress.toLowerCase()),
-  );
-  return CUSTOM_PAIRS.filter(
-    (pair) => !registered.has(pair.confidentialTokenAddress.toLowerCase()),
-  ).map((pair) => ({
-    tokenAddress: pair.tokenAddress,
-    confidentialTokenAddress: pair.confidentialTokenAddress,
-    isValid: true,
-  }));
+  return declared
+    .filter((pair) => !claimed.has(pair.confidentialTokenAddress.toLowerCase()))
+    .map((pair) => ({
+      tokenAddress: pair.tokenAddress,
+      confidentialTokenAddress: pair.confidentialTokenAddress,
+      isValid: true,
+    }));
+}
+
+function localPairsKey(pairs: readonly LocalPairRecord[]): string {
+  return pairs
+    .map((p) => p.confidentialTokenAddress.toLowerCase())
+    .sort()
+    .join(",");
 }
 
 /**
- * Every registered pair plus any local custom pairs, enriched for display.
- * Refetches on an interval so newly registered or revoked pairs appear
- * without a redeploy. Defaults to Sepolia; pass network: "mainnet" to browse
- * the Ethereum mainnet registry (read-only, no custom pairs).
+ * Every registered pair plus any local custom pairs and browser-added local
+ * pairs, enriched for display. Refetches on an interval so newly registered
+ * or revoked pairs appear without a redeploy, and immediately when the
+ * visitor adds or removes a local pair (it is part of the query key).
+ * Defaults to Sepolia; pass network: "mainnet" to browse the Ethereum
+ * mainnet registry (read-only, no custom or local pairs).
  */
 export function useRegistryPairs(options?: {
   enabled?: boolean;
   network?: RegistryNetwork;
 }) {
   const network = options?.network ?? "sepolia";
+  const localPairs = useLocalPairs();
   return useQuery({
-    queryKey: ["registry", "pairs", network],
+    queryKey: ["registry", "pairs", network, localPairsKey(localPairs)],
     queryFn: async (): Promise<EnrichedPair[]> => {
       const registryPairs = await fetchAllPairs(network);
+      const registered = new Set(
+        registryPairs.map((p) => p.confidentialTokenAddress.toLowerCase()),
+      );
       const customPairs =
-        network === "sepolia" ? customPairsMissingFrom(registryPairs) : [];
+        network === "sepolia" ? pairsMissingFrom(CUSTOM_PAIRS, registered) : [];
+      const claimedByCustom = new Set([
+        ...registered,
+        ...customPairs.map((p) => p.confidentialTokenAddress.toLowerCase()),
+      ]);
+      const visitorPairs =
+        network === "sepolia"
+          ? pairsMissingFrom(localPairs, claimedByCustom)
+          : [];
       return Promise.all([
         ...registryPairs.map((pair) => enrichPair(pair, "registry", network)),
         ...customPairs.map((pair) => enrichPair(pair, "custom", network)),
+        ...visitorPairs.map((pair) => enrichPair(pair, "local", network)),
       ]);
     },
     refetchInterval: 60_000,

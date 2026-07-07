@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 // PRD §7.2 correctness rule: the isValid flag is always surfaced. Revoked
 // pairs stay listed (coverage) but are unmistakably flagged; later phases
 // also block wrapping into them. Pairs declared in the local custom-pairs
-// config carry no registry validity, so they show a distinct Custom badge
-// instead of claiming to be registry-valid.
+// config, or added by the visitor through the registry UI, carry no
+// registry validity, so they show a distinct badge instead of claiming to
+// be registry-valid.
 export function ValidityBadge({
   isValid,
   source,
@@ -17,6 +18,16 @@ export function ValidityBadge({
     return (
       <Badge className="border-transparent bg-chart-3/15 text-chart-3 hover:bg-chart-3/15">
         Custom
+      </Badge>
+    );
+  }
+  if (source === "local") {
+    return (
+      <Badge
+        title="Added by you in this browser only"
+        className="border-transparent bg-chart-4/15 text-chart-4 hover:bg-chart-4/15"
+      >
+        Local
       </Badge>
     );
   }

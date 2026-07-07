@@ -21,6 +21,7 @@ import { PairDrawer } from "@/components/pair/pair-drawer";
 import { BlurReveal } from "@/components/shared/blur-reveal";
 import { PairTable } from "./pair-table";
 import { PairCards } from "./pair-cards";
+import { AddPairForm, AddPairToggle } from "./add-pair-form";
 
 type ValidityFilter = "all" | "valid" | "revoked";
 
@@ -44,6 +45,7 @@ export function RegistryExplorer() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ValidityFilter>("all");
   const [selected, setSelected] = useState<EnrichedPair | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
   const readOnly = network === "mainnet";
 
   const counts = useMemo(() => {
@@ -78,7 +80,7 @@ export function RegistryExplorer() {
         <p className="mt-2 max-w-2xl text-muted-foreground">
           {readOnly
             ? "Every ERC-20 → ERC-7984 wrapper pair registered on Ethereum mainnet, read live from the canonical Zama registry. Mainnet browsing is read-only: wrap, unwrap, faucet, and decryption run on Sepolia."
-            : "Every ERC-20 → ERC-7984 wrapper pair registered on Sepolia, read live from the canonical Zama registry, plus any custom pairs declared in the app's local config. Revoked wrappers stay listed but are flagged and blocked from wrapping."}
+            : "Every ERC-20 → ERC-7984 wrapper pair registered on Sepolia, read live from the canonical Zama registry, plus any custom pairs declared in the app's local config or added by you below. Revoked wrappers stay listed but are flagged and blocked from wrapping."}
         </p>
       </header>
       </BlurReveal>
@@ -170,8 +172,20 @@ export function RegistryExplorer() {
               aria-hidden
             />
           </Button>
+          {!readOnly && (
+            <AddPairToggle
+              open={addOpen}
+              onToggle={() => setAddOpen((v) => !v)}
+            />
+          )}
         </div>
       </BlurReveal>
+
+      {addOpen && !readOnly && (
+        <BlurReveal delay={0.04}>
+          <AddPairForm />
+        </BlurReveal>
+      )}
 
       {isPending ? (
         <PairListSkeleton />
