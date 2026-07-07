@@ -14,11 +14,13 @@ They are deliberately written as plain wagmi + viem + react-query so you can
 lift them into your own project with minimal surgery.
 
 **Dependencies:** `wagmi` v3, `viem` v2, `@tanstack/react-query` v5,
-`@zama-fhe/relayer-sdk`, plus two small lib modules the hooks import:
+`@zama-fhe/relayer-sdk`, plus small lib modules the hooks import:
 [`lib/fhevm.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/lib/fhevm.ts)
-(the SDK singleton) and
+(the SDK singleton),
 [`lib/unwrap-store.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/lib/unwrap-store.ts)
-(persistent unwrap state).
+(persistent unwrap state), and
+[`lib/local-pairs-store.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/lib/local-pairs-store.ts)
+(pairs a visitor added themselves, stored per-browser).
 
 ## Reads
 
@@ -30,16 +32,20 @@ registrations and revocations appear without a redeploy. Metadata reads use
 `Promise.allSettled`, so one broken token degrades to placeholders instead of
 hiding the pair.
 
-Sourcing is hybrid: the onchain registry is the primary source of truth, and
-pairs declared in
+Sourcing is hybrid, three tiers deep: the onchain registry is the primary
+source of truth; pairs declared in
 [`config/custom-pairs.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/config/custom-pairs.ts)
-are merged in after it with `source: "custom"` (the registry wins if a
-wrapper appears in both). See "Adding a new pair" in the repo README.
+are merged in next with `source: "custom"`; pairs a visitor added themselves
+through the registry page's **Add a pair** form (stored in their browser via
+[`lib/local-pairs-store.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/lib/local-pairs-store.ts))
+are merged in last with `source: "local"`. Each tier only fills in wrappers
+the tiers above it don't already claim. See "Adding a new pair" in the repo
+README.
 
 The registry exists on two networks, and the hook can read either.
 `network` defaults to `"sepolia"`; pass `"mainnet"` to browse the Ethereum
-mainnet registry (read-only in Obscura, and custom pairs are not merged
-there since they declare Sepolia addresses).
+mainnet registry (read-only in Obscura, and custom/local pairs are not
+merged there since they declare Sepolia addresses).
 
 ```ts
 const { data: pairs, isLoading } = useRegistryPairs();
