@@ -78,10 +78,5 @@ export const KNOWN_WRAPPERS: readonly KnownWrapper[] = [
 
 export const SEPOLIA_EXPLORER_URL = "https://sepolia.etherscan.io";
 
-export function explorerAddressUrl(address: string): string {
-  return `${SEPOLIA_EXPLORER_URL}/address/${address}`;
-}
-
-export function explorerTxUrl(txHash: string): string {
-  return `${SEPOLIA_EXPLORER_URL}/tx/${txHash}`;
-}
+// explorerAddressUrl and explorerTxUrl live in ./networks so they can serve
+// both deployments; they default to Sepolia.

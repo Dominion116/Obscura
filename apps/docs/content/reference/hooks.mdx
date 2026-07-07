@@ -30,9 +30,23 @@ registrations and revocations appear without a redeploy. Metadata reads use
 `Promise.allSettled`, so one broken token degrades to placeholders instead of
 hiding the pair.
 
+Sourcing is hybrid: the onchain registry is the primary source of truth, and
+pairs declared in
+[`config/custom-pairs.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/config/custom-pairs.ts)
+are merged in after it with `source: "custom"` (the registry wins if a
+wrapper appears in both). See "Adding a new pair" in the repo README.
+
+The registry exists on two networks, and the hook can read either.
+`network` defaults to `"sepolia"`; pass `"mainnet"` to browse the Ethereum
+mainnet registry (read-only in Obscura, and custom pairs are not merged
+there since they declare Sepolia addresses).
+
 ```ts
 const { data: pairs, isLoading } = useRegistryPairs();
 // pairs: EnrichedPair[], includes isValid, rate, tvs, wrapperDecimals...
+
+const { data: mainnetPairs } = useRegistryPairs({ network: "mainnet" });
+// the production pairs: cUSDC, cUSDT, cWETH, ...
 ```
 
 ### `useUnderlyingBalance(tokenAddress)`: [`use-wrap.ts`](https://github.com/Dominion116/Obscura/blob/main/apps/web/hooks/use-wrap.ts)

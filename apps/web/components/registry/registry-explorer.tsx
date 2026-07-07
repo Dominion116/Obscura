@@ -7,7 +7,11 @@
 
 import { useMemo, useState } from "react";
 import { RefreshCw, SearchX, ShieldAlert, Search } from "lucide-react";
-import type { EnrichedPair } from "@obscura/shared";
+import {
+  REGISTRY_NETWORKS,
+  type EnrichedPair,
+  type RegistryNetwork,
+} from "@obscura/shared";
 import { useRegistryPairs } from "@/hooks/use-registry";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,11 +38,13 @@ function matchesQuery(pair: EnrichedPair, query: string): boolean {
 }
 
 export function RegistryExplorer() {
+  const [network, setNetwork] = useState<RegistryNetwork>("sepolia");
   const { data: pairs, isPending, isError, error, refetch, isRefetching } =
-    useRegistryPairs();
+    useRegistryPairs({ network });
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ValidityFilter>("all");
   const [selected, setSelected] = useState<EnrichedPair | null>(null);
+  const readOnly = network === "mainnet";
 
   const counts = useMemo(() => {
     const valid = pairs?.filter((p) => p.isValid).length ?? 0;
@@ -70,9 +76,9 @@ export function RegistryExplorer() {
           Registry explorer
         </h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          Every ERC-20 → ERC-7984 wrapper pair registered on Sepolia, read
-          live from the canonical Zama registry. Revoked wrappers stay listed
-          but are flagged and blocked from wrapping.
+          {readOnly
+            ? "Every ERC-20 → ERC-7984 wrapper pair registered on Ethereum mainnet, read live from the canonical Zama registry. Mainnet browsing is read-only: wrap, unwrap, faucet, and decryption run on Sepolia."
+            : "Every ERC-20 → ERC-7984 wrapper pair registered on Sepolia, read live from the canonical Zama registry, plus any custom pairs declared in the app's local config. Revoked wrappers stay listed but are flagged and blocked from wrapping."}
         </p>
       </header>
       </BlurReveal>
@@ -95,7 +101,34 @@ export function RegistryExplorer() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            role="group"
+            aria-label="Choose network"
+            className="flex items-center gap-1 rounded-lg border border-border bg-card p-1"
+          >
+            {(Object.keys(REGISTRY_NETWORKS) as RegistryNetwork[]).map(
+              (key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    setNetwork(key);
+                    setSelected(null);
+                  }}
+                  aria-pressed={network === key}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    network === key
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {REGISTRY_NETWORKS[key].label}
+                </button>
+              ),
+            )}
+          </div>
           <div
             role="group"
             aria-label="Filter by validity"
@@ -144,6 +177,7 @@ export function RegistryExplorer() {
         <PairListSkeleton />
       ) : isError ? (
         <ErrorState
+          networkLabel={REGISTRY_NETWORKS[network].label}
           message={error instanceof Error ? error.message : String(error)}
           onRetry={() => refetch()}
         />
@@ -161,14 +195,16 @@ export function RegistryExplorer() {
             {filtered.length} of {counts.all} pairs shown
           </p>
           <div className="hidden md:block">
-            <PairTable pairs={filtered} onSelect={setSelected} />
+            <PairTable pairs={filtered} onSelect={setSelected} network={network} />
           </div>
           <div className="md:hidden">
-            <PairCards pairs={filtered} onSelect={setSelected} />
+            <PairCards pairs={filtered} onSelect={setSelected} network={network} />
           </div>
           <p className="text-xs text-muted-foreground">
             Read live from the registry at every load and refreshed each
             minute, so newly registered pairs appear automatically.
+            {readOnly &&
+              " Switch back to Sepolia to wrap, unwrap, and decrypt."}
           </p>
         </>
       )}
@@ -202,9 +238,11 @@ function PairListSkeleton() {
 }
 
 function ErrorState({
+  networkLabel,
   message,
   onRetry,
 }: {
+  networkLabel: string;
   message: string;
   onRetry: () => void;
 }) {
@@ -214,7 +252,7 @@ function ErrorState({
       <div>
         <p className="font-medium">Could not read the registry</p>
         <p className="mx-auto mt-1 max-w-md break-words text-sm text-muted-foreground">
-          The Sepolia RPC endpoint may be unavailable. {message}
+          The {networkLabel} RPC endpoint may be unavailable. {message}
         </p>
       </div>
       <Button variant="outline" onClick={onRetry}>

@@ -2,7 +2,7 @@
 
 **The Confidential Wrapper Registry, made usable.**
 
-Obscura is a production-ready web application built on the [Zama Confidential Token Wrappers Registry](https://docs.zama.org/protocol/protocol-apps/confidential-tokens/wrapper-registry). It surfaces every ERC-20 to ERC-7984 wrapper pair registered on Ethereum Sepolia, lets anyone wrap and unwrap tokens, decrypts confidential balances entirely client-side, and ships a faucet for the official cTokenMocks so testers always have tokens to work with.
+Obscura is a production-ready web application built on the [Zama Confidential Token Wrappers Registry](https://docs.zama.org/protocol/protocol-apps/confidential-tokens/wrapper-registry). It surfaces every ERC-20 to ERC-7984 wrapper pair registered on Ethereum Sepolia, lets anyone wrap and unwrap tokens, decrypts confidential balances entirely client-side, and ships a faucet for the official cTokenMocks so testers always have tokens to work with. The registry explorer can also browse the Ethereum mainnet registry read-only, so the production pairs are just as discoverable.
 
 **Live app:** https://obs-cura.vercel.app
 **Developer docs:** https://obscura-doc.vercel.app
@@ -23,10 +23,12 @@ The registry already exists to solve this, but there was no polished product tha
 
 | Feature | Description |
 | --- | --- |
-| **Registry explorer** | Every registered pair with underlying token, confidential wrapper, conversion rate, wrapper decimals, Total Value Shielded, and a clear valid/revoked badge. Search by symbol or address, filter by validity. Revoked pairs are visibly labelled and blocked from wrapping. |
+| **Registry explorer** | Every registered pair with underlying token, confidential wrapper, conversion rate, wrapper decimals, Total Value Shielded, and a clear valid/revoked badge. Search by symbol or address, filter by validity, and switch between Sepolia and the read-only Ethereum mainnet registry. Revoked pairs are visibly labelled and blocked from wrapping. |
 | **Wrap** | Approve-then-wrap flow with a live preview of the rounded amount that will actually wrap and the excess that will be refunded (wrappers cap at six decimals and round down). |
 | **Unwrap** | The two-step asynchronous flow implemented as an explicit state machine: request → public decryption → finalize. Every failure mode has an explicit state and a retry path. |
 | **Balance decryption** | Encrypted balances stay hidden by default. One click signs a typed-data request and decrypts the balance client-side, visible only to the holder. |
+| **Decrypt any token** | Paste the address of any ERC-7984 token on Sepolia, registry-listed or not, and decrypt the connected wallet's balance on it through the same EIP-712 user-decryption flow. Lives on the Portfolio page. |
+| **Custom pairs** | Declare custom or dev-only ERC-20 ↔ ERC-7984 pairs in a local config file. They appear in the explorer with a Custom badge and support the full wrap, unwrap, and decrypt surface. |
 | **Confidential transfer** | Send wrapped tokens with the amount encrypted, demonstrating the full ERC-7984 surface. |
 | **Portfolio** | Aggregated confidential holdings across every wrapper, decryptable on demand, plus pending and historical unwrap requests. |
 | **Faucet** | One-click minting of the official cTokenMocks on Sepolia. |
@@ -121,6 +123,7 @@ The web app runs at `http://localhost:3000`.
 | --- | --- |
 | `NEXT_PUBLIC_REOWN_PROJECT_ID` | Reown AppKit project id for wallet connection |
 | `NEXT_PUBLIC_SEPOLIA_RPC_URL` | Sepolia RPC endpoint (public default provided) |
+| `NEXT_PUBLIC_MAINNET_RPC_URL` | Ethereum mainnet RPC endpoint, used only to browse the mainnet registry read-only (public default provided) |
 | `NEXT_PUBLIC_API_URL` | Base URL of the Obscura API once deployed |
 | `NEXT_PUBLIC_SITE_URL` | Set on apps/web; canonical URL and social preview metadata base: `https://obs-cura.vercel.app` |
 | `NEXT_PUBLIC_DOCS_URL` | Set on apps/web; points at the deployed docs site: `https://obscura-doc.vercel.app` |
@@ -137,15 +140,70 @@ The web app runs at `http://localhost:3000`.
 | `npm run typecheck` | TypeScript checks across the monorepo |
 | `npm run lint` | Lint every workspace |
 
-## Key addresses (Sepolia)
+## Supported networks
 
-| Contract | Address |
+| Network | Support |
 | --- | --- |
-| Confidential Token Wrappers Registry | [`0x2f0750Bbb0A246059d80e94c454586a7F27a128e`](https://sepolia.etherscan.io/address/0x2f0750Bbb0A246059d80e94c454586a7F27a128e) |
+| Ethereum Sepolia | Full: browse, wrap, unwrap, confidential transfer, balance decryption, faucet |
+| Ethereum mainnet | Registry browsing (read-only): every production pair with metadata, rate, TVS, and Etherscan links |
+
+Sepolia is the interactive network; every flow judges or testers need runs there against the official cTokenMocks. The mainnet registry is surfaced so the production pairs (cUSDC, cUSDT, cWETH, and the rest) are discoverable from the same explorer, but no wallet ever connects to mainnet from Obscura.
+
+## Key addresses
+
+| Contract | Network | Address |
+| --- | --- | --- |
+| Confidential Token Wrappers Registry | Sepolia | [`0x2f0750Bbb0A246059d80e94c454586a7F27a128e`](https://sepolia.etherscan.io/address/0x2f0750Bbb0A246059d80e94c454586a7F27a128e) |
+| Confidential Token Wrappers Registry | Ethereum mainnet | [`0xeb5015fF021DB115aCe010f23F55C2591059bBA0`](https://etherscan.io/address/0xeb5015fF021DB115aCe010f23F55C2591059bBA0) |
 
 The full list of official wrapper pairs (cUSDCMock, cUSDTMock, cWETHMock, cBRONMock, cZAMAMock, ctGBPMock, cXAUtMock, ctGBP) lives in [`packages/shared/src/addresses/sepolia.ts`](packages/shared/src/addresses/sepolia.ts). The app always treats the on-chain registry as the source of truth; the static list is a convenience snapshot for the faucet.
 
 ABIs in the shared package were pulled from **Sourcify exact-match verifications** of the deployed implementation contracts, not transcribed by hand.
+
+## How the registry is sourced
+
+The pair list is hybrid, with a strict priority order:
+
+1. **On-chain Wrappers Registry (primary source of truth).** The app pages through `getTokenConfidentialTokenPairsSlice` on the official registry contract at every load and refreshes each minute, so pairs that Zama registers or revokes appear automatically, with no code change or redeploy.
+2. **Local custom-pairs config (additive).** [`apps/web/config/custom-pairs.ts`](apps/web/config/custom-pairs.ts) declares extra pairs that are not (or not yet) in the official registry: dev-only wrappers, wrappers under review, or private test deployments. These are merged in after the registry pairs and shown with a **Custom** badge so nobody mistakes them for registry-validated entries.
+
+Conflicts resolve in the registry's favour: if a wrapper declared locally later gets registered on-chain, the local entry is ignored automatically and the registry's validity flag takes over. Custom pairs support the same wrap, unwrap, transfer, and decrypt flows as registry pairs.
+
+## Adding a new pair
+
+There are two paths, depending on whether the pair is official or your own.
+
+### Official pairs: register on-chain, zero app changes
+
+The registry is the source of truth, so the correct way to add an official pair is to have it registered in the Zama Wrappers Registry (registration is permissioned and goes through Zama; see the [wrapper registry docs](https://docs.zama.org/protocol/protocol-apps/confidential-tokens/wrapper-registry)). The moment the `ConfidentialTokenRegistered` event lands, Obscura picks the pair up on its next refresh. No code change, no redeploy.
+
+### Custom or dev-only pairs: one entry in the local config
+
+For a wrapper that is not in the official registry (for example, one you deployed yourself while developing), add its addresses to [`apps/web/config/custom-pairs.ts`](apps/web/config/custom-pairs.ts):
+
+```ts
+export const CUSTOM_PAIRS: readonly CustomPairConfig[] = [
+  {
+    // Your ERC-20 underlying token on Sepolia
+    tokenAddress: "0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF",
+    // Its ERC-7984 confidential wrapper on Sepolia
+    confidentialTokenAddress: "0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639",
+  },
+];
+```
+
+That is the whole change. Symbol, name, decimals, conversion rate, and TVS are read on-chain from the two contracts, so only the addresses are declared. After a redeploy (`npm run build` or a push to the hosting branch), the pair appears in the registry explorer with a **Custom** badge, and every flow works against it: wrap, unwrap, confidential transfer, portfolio, and balance decryption.
+
+Requirements for the wrapper contract: it must implement the ERC-7984 confidential token surface used by the app (`wrap`, `unwrap`/`finalizeUnwrap`, `confidentialBalanceOf`, `rate`, `decimals`), which any wrapper built from Zama's confidential token contracts does.
+
+## Deployment
+
+| Piece | Where | How |
+| --- | --- | --- |
+| Web app (`apps/web`) | Vercel | Import the repo, set the root to `apps/web`, add the `NEXT_PUBLIC_*` env vars from the table above |
+| Docs (`apps/docs`) | Vercel | Same, with root `apps/docs` |
+| Indexer + API (`apps/api`) | Render | [`render.yaml`](render.yaml) is a ready Render Blueprint: New → Blueprint → select this repo, then supply `MONGODB_URI` and `SEPOLIA_RPC_URL` when prompted |
+| Database | MongoDB Atlas | A free-tier cluster is sufficient; the indexer creates its collections on boot |
 
 ## Correctness rules the app never breaks
 

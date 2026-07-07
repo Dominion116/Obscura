@@ -46,7 +46,7 @@ export function HoldingCard({
             {pair.wrapperName}
           </p>
         </div>
-        <ValidityBadge isValid={pair.isValid} />
+        <ValidityBadge isValid={pair.isValid} source={pair.source} />
       </div>
 
       <div>

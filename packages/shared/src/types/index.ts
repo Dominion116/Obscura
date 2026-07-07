@@ -10,6 +10,12 @@ export interface TokenWrapperPair {
 
 /** A pair enriched with token metadata for display. */
 export interface EnrichedPair extends TokenWrapperPair {
+  /**
+   * Where the pair was sourced: the onchain Wrappers Registry (the primary
+   * source of truth, and the default when absent) or the app's local
+   * custom-pairs config for dev-only or not-yet-registered wrappers.
+   */
+  source?: "registry" | "custom";
   tokenSymbol: string;
   tokenName: string;
   tokenDecimals: number;

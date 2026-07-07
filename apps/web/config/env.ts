@@ -6,6 +6,10 @@ export const env = {
   sepoliaRpcUrl:
     process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL ??
     "https://ethereum-sepolia-rpc.publicnode.com",
+  // Read-only: used solely to browse the mainnet Wrappers Registry.
+  mainnetRpcUrl:
+    process.env.NEXT_PUBLIC_MAINNET_RPC_URL ??
+    "https://ethereum-rpc.publicnode.com",
   apiUrl: process.env.NEXT_PUBLIC_API_URL ?? "",
   // The developer reference is a separate Nextra site (apps/docs).
   docsUrl: process.env.NEXT_PUBLIC_DOCS_URL ?? "http://localhost:3001",
